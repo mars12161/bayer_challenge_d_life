@@ -73,21 +73,21 @@ def plot_distribution():
     fig, ax = plt.subplots()
     ax.pie(counts, labels=counts.index, autopct='%1.1f%%')
     ax.axis('equal')
-    st.pyplot(fig)
+    st.pyplot(fig, clear_figure=True)
 
 
 def symmetry_boxplot():
     st.subheader('Symmetry vs. Diagnosis (Box Plot):')
     sns.boxplot(x='diagnosis', y='symmetry_mean', data=df)
     plt.title('Symmetry vs. Diagnosis')
-    st.pyplot(plt)
+    st.pyplot(plt, clear_figure=True)
 
 
 def symmetry_violinplot():
     st.subheader('Symmetry vs. Diagnosis (Violin Plot):')
     sns.violinplot(x='diagnosis', y='symmetry_mean', data=df)
     plt.title('Symmetry vs. Diagnosis')
-    st.pyplot(plt)
+    st.pyplot(plt, clear_figure=True)
 
 
 def correlation_heatmap():
@@ -109,10 +109,12 @@ def main():
 
     data_overview()
     plot_summary()
-    write_checks()
-    #plot_distribution()
+    # write_checks()
+
+    plot_distribution()
     symmetry_boxplot()
     symmetry_violinplot()
+
     correlation_heatmap()
 
 
