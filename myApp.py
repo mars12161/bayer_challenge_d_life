@@ -7,6 +7,18 @@ from PIL import Image
 from streamlit_option_menu import option_menu
 from streamlit_extras.switch_page_button import switch_page
 
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier 
+from sklearn.metrics import precision_score, recall_score, f1_score
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+from sklearn.model_selection import cross_val_score
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.svm import SVC
+from sklearn.ensemble import VotingClassifier
+from sklearn.metrics import RocCurveDisplay, auc
+from sklearn import metrics
+
 st.title('Breast Cancer Dataset')
 
 st.markdown(
@@ -26,11 +38,14 @@ st.markdown(
 with st.sidebar:
 	image = Image.open('images/bc_awareness.png')
 	st.image(image, width=100)
-	selected = option_menu("Main Menu", ['Information', 'Exploratory Analysis', 'Machine Learning'])
+	selected = option_menu("Main Menu", ['Information', 'Exploratory Analysis', 'Machine Learning', 'Sources'])
 	selected
 
 df = pd.read_csv('./dataset_factorised.csv')
 #divide the data into 2 classes
+X = df.drop(['id','diagnosis'], axis = 1)
+y = df['diagnosis']
+X_train, X_test, y_train, y_test = train_test_split(X,y, test_size = .20, random_state = 12)
 Malignant=df[df['diagnosis'] == 0]
 Benign=df[df['diagnosis'] == 1]
 
@@ -50,17 +65,30 @@ def histplot(features):
 	plt.show()
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
+def plot_heatmap(confusion):
+	
+	plt.figure(figsize=(4,3))
+	sns.heatmap(confusion, xticklabels = np.unique(y), yticklabels = np.unique(y),
+				cmap = 'RdPu', annot=True, fmt='g')
+	# fmt is used to switch off scientific notation
+	plt.xlabel('Predicted', fontsize=14)
+	plt.ylabel('Actual', fontsize = 14)
+
 if 'Information' in selected:
-	st.markdown("Features are computed from a digitized image of a fine needle \
-            aspirate (FNA) of a breast mass. They describe characteristics of \
-            the cell nuclei present in the image. n the 3-dimensional space is \
-            that described in: [K. P. Bennett and O. L. Mangasarian: \"Robust Linear \
-            Programming Discrimination of Two Linearly Inseparable Sets\", Optimization \
-            Methods and Software 1, 1992, 23-34]. This database is also available through \
-            the UW CS ftp server: ftp ftp.cs.wisc.edu cd math-prog/cpo-dataset/machine-learn/WDBC/Also \
-	    can be found on UCI Machine Learning Repository: https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+%28Diagnostic%29")
+	st.subheader('Information')
+	st.markdown("An estimated 2.3 million females were diagnosed with breast cancer \
+	    in 2020, accounting for approximately 24.5% of all cancer cases worldwide.  \n\
+		Although female breast cancer incidence rates are lowest in less developed \
+	    regions, mortality rates in these areas are similar to more \
+	    developed countries due to lack of access to early detection and treatment.  \nThis \
+	    project aims to improve the mass screening of populations and eventually decrease medical \
+	    costs through computer-aided diagnosis. With decreased costs  \n")
+	image1 = Image.open('images/figure2.png')
+	st.image(image1)
+	st.write("Source: https://canceratlas.cancer.org")    
 
 if 'Exploratory Analysis' in selected:
+	st.subheader('Exploratory Analysis')
 	#divide feature names into groups
 	mean_features= ['radius_mean','texture_mean','perimeter_mean',\
 				'area_mean','smoothness_mean','compactness_mean',\
@@ -108,18 +136,71 @@ if 'Exploratory Analysis' in selected:
 		if 'Worst Features' in option_2: 
 			sns.heatmap(df_corr[worst_features].corr(), ax=ax)
 			st.write(fig)
+if 'Machine Learning' in selected:
+	st.subheader('Machine Learning')
+	option_3 = st.selectbox('Please select a model:', ('Random Forest Classifier', 'Logistic Regression', 'Support Vector Machine', 'Ensemble Model'))
+	if 'Random Forest Classifier' in option_3: 
+		st.markdown("A **Random Forest Classifier** model was used with the following variables:  \nn_estimators = 40, max_depth = 4")
+		rfc = RandomForestClassifier(n_estimators=40, max_depth=4) 
+		rfc.fit(X_train, y_train)
+		y_pred_rfc = rfc.predict(X_train)
+		conf_rfc = confusion_matrix(y_train, y_pred_rfc)
+		plot_heatmap(conf_rfc)
+		st.markdown("The Random Forest Model has achieved:")
+		results_rfc = pd.DataFrame({
+    		'Score': ['accuracy', 'precision', 'recall', 'f1'], 
+    '		Results': [rfc.score(X_train,y_train), precision_score(y_train, y_pred_rfc), recall_score(y_train, y_pred_rfc), f1_score(y_train, y_pred_rfc)]})
+		st.write(results_rfc)
+		conf_rfc = confusion_matrix(y_train, y_pred_rfc)
+		st.write("**Confusion Matrix for Random Forest Classification Model**")
+		st.pyplot(plot_heatmap(conf_rfc))
+	if 'Logistic Regression' in option_3: 
+		st.markdown("A **Logistic Regression** model was used with the following variables:  \nsolver='liblinear'")
+		lr = LogisticRegression(solver='liblinear') 
+		lr.fit(X_train,y_train)
+		y_pred_lr = lr.predict(X_train)
+		conf_lr = confusion_matrix(y_train, y_pred_lr)
+		plot_heatmap(conf_lr)
+		st.markdown("The Logistic Regression Model has achieved:")
+		results_lr = pd.DataFrame({
+    		'Score': ['accuracy', 'precision', 'recall', 'f1'], 
+    '		Results': [lr.score(X_train,y_train), precision_score(y_train, y_pred_lr), recall_score(y_train, y_pred_lr), f1_score(y_train, y_pred_lr)]})
+		st.write(results_lr)
+		conf_lr = confusion_matrix(y_train, y_pred_lr)
+		st.write("**Confusion Matrix for Logistic Regression Model**")
+		st.pyplot(plot_heatmap(conf_lr))
+	if 'Support Vector' in option_3: 
+		st.markdown("A **Support Vector** model was used with the following variables:  \ndecision_function_shape='ovo', probability=True")
+		svm = SVC(decision_function_shape='ovo', probability=True)
+		svm.fit(X_train, y_train)
+		y_pred_svm = svm.predict(X_train)
+		conf_svm = confusion_matrix(y_train, y_pred_svm)
+		plot_heatmap(conf_svm)
+		st.markdown("The Support Vector Model has achieved:")
+		results_svm = pd.DataFrame({
+    		'Score': ['accuracy', 'precision', 'recall', 'f1'], 
+    '		Results': [svm.score(X_train,y_train), precision_score(y_train, y_pred_svm), recall_score(y_train, y_pred_svm), f1_score(y_train, y_pred_svm)]})
+		st.write(results_svm)
+		conf_svm = confusion_matrix(y_train, y_pred_svm)
+		st.write("**Confusion Matrix for Support Vector Machine**")
+		st.pyplot(plot_heatmap(conf_svm))
+	if 'Ensemble Model' in option_3: 
+		st.markdown("An **Ensemble Model** was used with the following variables:  \nLogisticRegression(solver='liblinear'),  \nDecisionTreeClassifier,  \nSupport Vector Machine(kernel='rbf', probability=True)  \nand a Voting Classifier(voting='soft')")
+		models = [('logreg', LogisticRegression(solver='liblinear')), ('tree', DecisionTreeClassifier()), ('svm', SVC(kernel='rbf', probability=True))]
+		em = VotingClassifier(models, voting = 'soft')
+		em.fit(X_train, y_train)
+		#accuracy_em = em.score(X_train_em, y_train_em)
+		y_pred_em = em.predict(X_train)
+		st.markdown("The Ensemble Model has achieved:")
+		results_em = pd.DataFrame({
+    		'Score': ['accuracy', 'precision', 'recall', 'f1'], 
+    '		Results': [em.score(X_train,y_train), precision_score(y_train, y_pred_em), recall_score(y_train, y_pred_em), f1_score(y_train, y_pred_em)]})
+		st.write(results_em)
+		conf_em = confusion_matrix(y_train, y_pred_em)
+		st.write("**Confusion Matrix for Ensemble Model**")
+		st.pyplot(plot_heatmap(conf_em))
 
-
-	
-
-
-#fig, ax = plt.subplots()
-#sns.heatmap(df_col.corr(), ax=ax)
-#st.write(fig)
-
-
-
-
-
-
-
+if 'Sources' in selected:
+	st.subheader('Sources')
+	st.markdown("Dataset: http://archive.ics.uci.edu/dataset/17/breast+cancer+wisconsin+diagnostic  \nhttps://www.ncbi.nlm.nih.gov/pmc/articles/PMC8626596/  \n\
+	     https://canceratlas.cancer.org/  \n")
