@@ -8,6 +8,14 @@ import pandas as pd
 import streamlit as st
 
 
+def read_data(filepath: str) -> pd.DataFrame:
+    return pd.read_csv(filepath)
+
+
+df = read_data("data.csv")
+df = df.dropna(axis=1, how='all')
+
+
 def create_tabs():
     tab1, tab2, tab3 = st.tabs(['Overview', 'AI', 'Predictions'])
 
