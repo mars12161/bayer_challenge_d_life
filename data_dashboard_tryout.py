@@ -120,5 +120,5 @@ def main():
 
 if __name__ == '__main__':
     main()
-    # run program like this: streamlit run data_dashboard.py
+    # run program like this: streamlit run data_dashboard_tryout.py
 
