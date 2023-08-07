@@ -7,18 +7,16 @@ from PIL import Image
 import plotly.express as px
 from streamlit_option_menu import option_menu
 from streamlit_extras.switch_page_button import switch_page
-
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier 
 from sklearn.metrics import precision_score, recall_score, f1_score
-from sklearn.metrics import confusion_matrix, plot_roc_curve, plot_precision_recall_curve, ConfusionMatrixDisplay
-from sklearn.model_selection import cross_val_score
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
 from sklearn.ensemble import VotingClassifier
-from sklearn.metrics import RocCurveDisplay, auc
-from sklearn import metrics
+from sklearn.metrics import RocCurveDisplay, auc, plot_roc_curve, plot_precision_recall_curve
+#from sklearn import metrics
 
 st.title('Breast Cancer Dataset')
 
