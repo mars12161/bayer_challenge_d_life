@@ -15,7 +15,7 @@ def read_data(filepath: str) -> pd.DataFrame:
     return pd.read_csv(filepath)
 
 
-df = read_data("data.csv")
+df = read_data("data/data.csv")
 df = df.dropna(axis=1, how='all')
 
 
