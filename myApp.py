@@ -76,18 +76,25 @@ def plot_heatmap(confusion):
 def ml_model(model, X_train, y_train, X_test, y_test):
 	model.fit(X_train, y_train)
 	y_train_pred = model.predict(X_train)
-	conf_model = confusion_matrix(y_train, y_train_pred)
-	results_model = pd.DataFrame({'Score': ['accuracy', 'precision', 'recall', 'f1'], \
-				  'Results': [model.score(X_train, y_train_pred), precision_score(y_train, y_train_pred), recall_score(y_train, y_train_pred), f1_score(y_train, y_train_pred)]})
+	y_test_pred = model.predict(X_test)
+	conf_model = confusion_matrix(y_test, y_test_pred)
+	results_model_train = pd.DataFrame({
+		'Score': ['accuracy', 'precision', 'recall', 'f1'],
+		'Results': [model.score(X_train, y_train_pred), precision_score(y_train, y_train_pred), recall_score(y_train, y_train_pred), f1_score(y_train, y_train_pred)]})
 	st.subheader("Training Scores")
-	st.write(results_model)
-	st.subheader("Confusion Matrix")
+	st.write(results_model_train)
+	results_model_test = pd.DataFrame({
+		'Score': ['accuracy', 'precision', 'recall', 'f1'],
+		'Results': [model.score(X_test, y_test_pred), precision_score(y_test, y_test_pred), recall_score(y_test, y_test_pred), f1_score(y_test, y_test_pred)]})
+	st.subheader("Test Scores")
+	st.write(results_model_test)
+	st.subheader("Confusion Matrix on Test Data")
 	st.pyplot(plot_heatmap(conf_model))
-	st.subheader("ROC Curve")
+	st.subheader("ROC Curve on Test Data")
 	st.write("The ROC and AUC are run on the test data after the model has been trained.")
 	plot_roc_curve(model, X_test, y_test)
 	st.pyplot()
-	st.subheader("Precision-Recall Curve")
+	st.subheader("Precision-Recall Curve on Test Data")
 	plot_precision_recall_curve(model, X_test, y_test)
 	st.pyplot()
 
@@ -104,7 +111,7 @@ if 'Information' in selected:
 	image1 = Image.open('images/figure2.png')
 	st.image(image1)
 	st.write("Source: https://canceratlas.cancer.org")
-	st.subheader('Breast Cancer Deaths ')
+	st.subheader('Breast Cancer Deaths in 2018')
 	st.write("Included in the hover data below is the current number of diagnosed cases of breast cancer per 100 people, in both sexes and age-standardized")
 	fig = px.choropleth(cd_2018,
 					 locations = "code", 
