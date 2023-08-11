@@ -27,7 +27,7 @@ from sklearn.metrics import RocCurveDisplay, auc, plot_roc_curve, plot_precision
 #from sklearn import metrics
 
 
-def ask_pandas():
+"""def ask_pandas():
     llm = OpenAI(api_token='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')
     pandasai = PandasAI(llm)
     with st.form("Question"):
@@ -57,12 +57,12 @@ def create_tabs():
         st.header("Predictions")
 
 def main():
-    create_tabs()
+    create_tabs()"""
 
 st.title('Breast Cancer Dataset')
 
 st.markdown(
-	"""
+
 	<style>
 		[data-testid=stSidebar] [data-testid=stImage]{
 			text-align: center;
@@ -72,14 +72,14 @@ st.markdown(
 			width: 100%;
 		}
 	</style>
-	""", unsafe_allow_html=True
+	, unsafe_allow_html=True
 )
 
-"""with st.sidebar:
+with st.sidebar:
 	image = Image.open('images/bc_awareness.png')
 	st.image(image, width=100)
 	selected = option_menu("Menu", ['Information', 'Exploratory Analysis', 'Machine Learning', 'Sources'])
-	selected"""
+	selected
 
 cd_2018 = pd.read_csv('./cd_2018.csv')
 df = pd.read_csv('./dataset_factorised.csv')
