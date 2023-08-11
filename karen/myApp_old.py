@@ -8,8 +8,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import seaborn as sns
-from pandasai import PandasAI
-from pandasai.llm.openai import OpenAI
+#from pandasai import PandasAI
+#from pandasai.llm.openai import OpenAI
 import matplotlib.pyplot as plt
 from PIL import Image
 import plotly.express as px
@@ -26,42 +26,9 @@ from sklearn.ensemble import VotingClassifier
 from sklearn.metrics import RocCurveDisplay, auc, plot_roc_curve, plot_precision_recall_curve
 #from sklearn import metrics
 
-
-"""def ask_pandas():
-    llm = OpenAI(api_token='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')
-    pandasai = PandasAI(llm)
-    with st.form("Question"):
-        question = st.text_input("Question", value="", type="default")
-        submitted = st.form_submit_button("Submit")
-        if submitted:
-            with st.spinner("Thinking..."):
-                answer = pandasai.run(df, prompt=question)
-
-                fig = plt.gcf()
-                if fig.get_axes():
-                    st.pyplot(fig)
-                st.write(answer)
-
-def create_tabs():
-    tab1, tab2, tab3 = st.tabs(['Overview', 'AI', 'Predictions'])
-
-    with tab1:
-        st.header("Data Overview")
-
-    with tab2:
-        st.header("Ask the AI")
-        st.write("Here you can ask the AI a question about the data")
-        ask_pandas()
-
-    with tab3:
-        st.header("Predictions")
-
-def main():
-    create_tabs()"""
-
 st.title('Breast Cancer Dataset')
 
-st.markdown(
+"""st.markdown(
 
 	<style>
 		[data-testid=stSidebar] [data-testid=stImage]{
@@ -73,13 +40,7 @@ st.markdown(
 		}
 	</style>
 	, unsafe_allow_html=True
-)
-
-with st.sidebar:
-	image = Image.open('images/bc_awareness.png')
-	st.image(image, width=100)
-	selected = option_menu("Menu", ['Information', 'Exploratory Analysis', 'Machine Learning', 'Sources'])
-	selected
+)"""
 
 cd_2018 = pd.read_csv('./cd_2018.csv')
 df = pd.read_csv('./dataset_factorised.csv')
@@ -132,62 +93,61 @@ def ml_model(model, X_train, y_train, X_test, y_test):
 	plot_precision_recall_curve(model, X_test, y_test)
 	st.pyplot()
 
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["Information", "Exploratory Analysis", "Machine Learning", "Predictions", "Sources"])
 
-if 'Information' in selected:
-	st.subheader('Information')
+with tab1:
+	st.header("Information")
 	st.markdown("An estimated 2.1 million people were diagnosed with breast cancer \
-		in 2018 worldwide.  It is the second leading cause of death by cancer in females (leading \
-		cause is lung cancer).  \n  \nBreast cancer incidence rates are lowest in less developed regions however their mortality \
-		rates are similar to more developed regions.  This would indicate that it is due to less early \
-		detection.  \n  \nThis project aims to improve the mass screening of populations and \
-		and decreasing medical costs through computer-aided diagnosis.  In addition, early detection has \
-		been correlated with a higher rate of survival.\n")
+	in 2018 worldwide.  It is the second leading cause of death by cancer in females (leading \
+	cause is lung cancer).  \n  \nBreast cancer incidence rates are lowest in less developed regions however their mortality \
+	rates are similar to more developed regions.  This would indicate that it is due to less early \
+	detection.  \n  \nThis project aims to improve the mass screening of populations and \
+	and decreasing medical costs through computer-aided diagnosis.  In addition, early detection has \
+	been correlated with a higher rate of survival.\n")
 	image1 = Image.open('images/figure2.png')
 	st.image(image1)
 	st.write("Source: https://canceratlas.cancer.org")
 	st.subheader('Breast Cancer Deaths ')
 	st.write("Included in the hover data below is the current number of diagnosed cases of breast cancer per 100 people, in both sexes and age-standardized")
 	fig = px.choropleth(cd_2018,
-					 locations = "code", 
-					 color = "deaths", 
-					 hover_name = "country", 
-					 hover_data = ["diagnosed"],
-					 color_continuous_scale = px.colors.sequential.Sunsetdark)
+			locations = "code", 
+			color = "deaths", 
+			hover_name = "country", 
+			hover_data = ["diagnosed"],
+			color_continuous_scale = px.colors.sequential.Sunsetdark)
 	st.plotly_chart(fig)
-	
-if 'Exploratory Analysis' in selected:
-	st.subheader('Exploratory Analysis')
-	#divide feature names into groups
-	mean_features= ['radius_mean','texture_mean','perimeter_mean',\
-				'area_mean','smoothness_mean','compactness_mean',\
-				'concavity_mean','concave_points_mean','symmetry_mean',\
-				'fractal_dimension_mean']
-	error_features=['radius_se','texture_se','perimeter_se',\
-				'area_se','smoothness_se','compactness_se',\
-				'concavity_se','concave_points_se','symmetry_se',\
-				'fractal_dimension_se']
-	worst_features=['radius_worst','texture_worst','perimeter_worst',\
-				'area_worst','smoothness_worst','compactness_worst',\
-				'concavity_worst','concave_points_worst',\
-				'symmetry_worst','fractal_dimension_worst']
-	option = st.selectbox(
-		'What would you like to see?',
-		('Density Graphs', 'Correlation or Heatmap'))
 
+with tab2:
+	st.header("Exploratory Analysis")
+#		st.subheader('Exploratory Analysis')
+	#divide feature names into groups
+	mean_features= ['radius_mean','texture_mean','perimeter_mean',\				'area_mean','smoothness_mean','compactness_mean',\
+		'concavity_mean','concave_points_mean','symmetry_mean',\
+		'fractal_dimension_mean']
+	error_features=['radius_se','texture_se','perimeter_se',\
+		'area_se','smoothness_se','compactness_se',\
+		'concavity_se','concave_points_se','symmetry_se',\
+		'fractal_dimension_se']
+	worst_features=['radius_worst','texture_worst','perimeter_worst',\
+		'area_worst','smoothness_worst','compactness_worst',\
+		'concavity_worst','concave_points_worst',\
+		'symmetry_worst','fractal_dimension_worst']
+	option = st.selectbox('What would you like to see?',
+		('Density Graphs', 'Correlation or Heatmap'))
 	if 'Density Graphs' in option: 
 		option_1 = st.selectbox('Please select a group:', ('Mean Features', 'Standard Error Features', 'Worst Features'))
-		if 'Mean Features' in option_1: 
-			st.write(df[mean_features].describe())
-			mf = histplot(mean_features)
-			st.pyplot(mf)
-		if 'Standard Error Features' in option_1: 
-			st.write(df[error_features].describe())
-			ef = histplot(error_features)
-			st.pyplot(ef)
-		if 'Worst Features' in option_1: 
-			st.write(df[worst_features].describe())
-			wf = histplot(worst_features)
-			st.pyplot(wf)
+	if 'Mean Features' in option_1: 
+		st.write(df[mean_features].describe())
+		mf = histplot(mean_features)
+		st.pyplot(mf)
+	if 'Standard Error Features' in option_1: 
+		st.write(df[error_features].describe())
+		ef = histplot(error_features)
+		st.pyplot(ef)
+	if 'Worst Features' in option_1: 
+		st.write(df[worst_features].describe())
+		wf = histplot(worst_features)
+		st.pyplot(wf)
 	if 'Correlation or Heatmap' in option: 
 		df_corr = df.drop(columns = ['id'])
 		fig, ax = plt.subplots()
@@ -204,8 +164,8 @@ if 'Exploratory Analysis' in selected:
 		if 'Worst Features' in option_2: 
 			sns.heatmap(df_corr[worst_features].corr(), ax=ax)
 			st.write(fig)
-if 'Machine Learning' in selected:
-	st.subheader('Machine Learning')
+with tab3:
+	st.header("Machine Learning")
 	option_3 = st.selectbox('Please select a model:', ('Random Forest Classifier', 'Logistic Regression', 'Support Vector Machine', 'Ensemble Model'))
 	if 'Random Forest Classifier' in option_3: 
 		st.markdown("A **Random Forest Classifier** model was used with the following variables:  \nn_estimators = 40, max_depth = 4")
@@ -224,15 +184,67 @@ if 'Machine Learning' in selected:
 		models = [('logreg', LogisticRegression(solver='liblinear')), ('tree', DecisionTreeClassifier()), ('svm', SVC(kernel='rbf', probability=True))]
 		em = VotingClassifier(models, voting = 'soft')
 		ml_model(em, X_train, y_train, X_test, y_test)
-
-if 'Sources' in selected:
+with tab4:
+	st.header("Predictions")
+with tab5:
+	st.header("Sources")
 	st.subheader('Dataset')
 	st.markdown("http://archive.ics.uci.edu/dataset/17/breast+cancer+wisconsin+diagnostic")
 	st.subheader('Sources')
 	st.markdown("https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8626596/,  \n\
 		 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7950292/,\n\
-		 https://canceratlas.cancer.org/,  \nhttps://ourworldindata.org/cancer  \n")
+		 https://canceratlas.cancer.org/,  \nhttps://ourworldindata.org/cancer  \n")	
+
+def main():
+	create_tabs()
+
+#I build an app with Wisconsin breast cancer diagnosis and used machine learning to give you these results, now I want you to be in the role of assistant within that app and generate general guidelines on what should he/she do when I give you the percentage
+#now generate guidelines for these predictions as you are talking to the patient:
+
+#Prediction Results:
+#Malignant Probability: {M}
+#Benign Probability: {B}
+
+
+#  response = openai.Completion.create(
+#	model="text-davinci-003",
+#	prompt=prompt,
+#	temperature=0.6,
+#	max_tokens = 400
+#  )
+
+#  guidelines = response.choices[0].text.strip()
+#  return(guidelines)
+
+#def main():
+#  st.set_page_config(
+#	page_title="Breast Cancer Predictor",
+#	page_icon=":female-doctor:",
+#	layout="wide",
+#	initial_sidebar_state="expanded"
+#  )
+
+  
+#  input_data = add_sidebar()
+  
+#  with st.container():
+#	st.title("Breast Cancer Predictor")
+#	st.write("Please connect this app to your cytology lab to help diagnose breast cancer form your tissue sample. This app predicts using a machine learning model whether a breast mass is benign or malignant based on the measurements it receives from your cytosis lab. You can also update the measurements by hand using the sliders in the sidebar. ")
+  
+#  col1, col2 = st.columns([4,1])
+  
+#  with col1:
+#	radar_chart = get_radar_chart(input_data)
+#	st.plotly_chart(radar_chart)
+#	st.write("---")
+#  with col2:
+#	B , M = add_predictions(input_data)
+#	st.header("Ask the AI")
+#	st.write("Here you can ask the AI a question about the data")
+#	if st.button('Generate guidlines!'):
+#	  with col1:
+#		st.write(assistant(B, M))
 	
 
-if __name__ == "__main__":
-    main()
+#if __name__ == "__main__":
+#	main()
