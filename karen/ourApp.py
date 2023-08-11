@@ -34,13 +34,13 @@ st.markdown(
 	""", unsafe_allow_html=True
 )
 
-with st.sidebar:
-	image = Image.open('images/bc_awareness.png')
-	st.image(image, width=100)
+#with st.sidebar:
+#	image = Image.open('images/bc_awareness.png')
+#	st.image(image, width=100)
 #	selected = option_menu("Menu", ['Information', 'Exploratory Analysis', 'Machine Learning', 'Sources'])
 #	selected
 
-cd_2018 = pd.read_csv('./cd_2018.csv')
+cd_2018 = pd.read_csv('./cd_2018.csv') #for the map on info page
 df = pd.read_csv('./dataset_factorised.csv')
 #divide the data into 2 classes
 X = df.drop(['id','diagnosis'], axis = 1)
@@ -48,6 +48,8 @@ y = df['diagnosis']
 X_train, X_test, y_train, y_test = train_test_split(X,y, test_size = .20, random_state = 12)
 Malignant=df[df['diagnosis'] == 0]
 Benign=df[df['diagnosis'] == 1]
+X_train_fr_rfc = pd.read_csv('./X_train_rfc_feature_elim.csv')
+X_test_fr_rfc = pd.read_csv('./X_test_rfc_feature_elim.csv')
 
 def histplot(features):
 	plt.figure(figsize=(10,15))
@@ -78,16 +80,11 @@ def ml_model(model, X_train, y_train, X_test, y_test):
 	y_train_pred = model.predict(X_train)
 	y_test_pred = model.predict(X_test)
 	conf_model = confusion_matrix(y_test, y_test_pred)
-	results_model_train = pd.DataFrame({
-		'Score': ['accuracy', 'precision', 'recall', 'f1'],
-		'Results': [model.score(X_train, y_train_pred), precision_score(y_train, y_train_pred), recall_score(y_train, y_train_pred), f1_score(y_train, y_train_pred)]})
-	st.subheader("Training Scores")
-	st.write(results_model_train)
 	results_model_test = pd.DataFrame({
 		'Score': ['accuracy', 'precision', 'recall', 'f1'],
 		'Results': [model.score(X_test, y_test_pred), precision_score(y_test, y_test_pred), recall_score(y_test, y_test_pred), f1_score(y_test, y_test_pred)]})
 	st.subheader("Test Scores")
-	st.write(results_model_test)
+	#st.write(results_model_test)
 	st.subheader("Confusion Matrix on Test Data")
 	st.pyplot(plot_heatmap(conf_model))
 	st.subheader("ROC Curve on Test Data")
@@ -172,11 +169,22 @@ with tab2:
 			st.write(fig)
 with tab3:
 	st.header('Machine Learning')
+	st.write("All machine learning models were trained using an 80/20 split and using stratification.")
 	option_3 = st.selectbox('Please select a model:', ('Random Forest Classifier', 'Logistic Regression', 'Support Vector Machine', 'Ensemble Model'))
 	if 'Random Forest Classifier' in option_3: 
-		st.markdown("A **Random Forest Classifier** model was used with the following variables:  \nn_estimators = 40, max_depth = 4")
-		rfc = RandomForestClassifier(n_estimators=40, max_depth=4)
-		ml_model(rfc, X_train, y_train, X_test, y_test)
+		st.subheader("Random Forest Classifier (or RFC)")
+		st.write("Training Score Results before any feature elimination was: \n\
+				accuracy: 1.0, precision: 1.0, recall: 1.0, and f1: 1.0\n")
+		st.write("We reviewed the feature importance in SKlearn. We then eliminated all \
+			features that had a coefficient value less than 0.025 and reran the RFC model to compare the outcome.")
+		image = Image.open('images/rfc_features.png')
+		st.image(image, width=100)
+		st.write(results_model_test)
+		st.markdown("A **Random Forest Classifier** model was used with the following variables: \n\
+				n_estimators = 8, max_depth = 12 \nwhich was chosen due to the results of a GridSearch \
+				Hyperparameter Optimization model using precision as a scoring metric on the full dataset.")
+		rfc = RandomForestClassifier(n_estimators=8, max_depth=12)
+		ml_model(rfc, X_train_fr_rfc, y_train, X_test_fr_rfc, y_test)
 	if 'Logistic Regression' in option_3: 
 		st.markdown("A **Logistic Regression** model was used with the following variables:  \nsolver='liblinear'")
 		lr = LogisticRegression(solver='liblinear', random_state = 12) 
@@ -192,6 +200,7 @@ with tab3:
 		ml_model(em, X_train, y_train, X_test, y_test)
 with tab4:
 	st.subheader('Predictions')
+	"""
 	def get_clean_data():
 		data = pd.read_csv("../data/data.csv")
 		data = data.drop(['Unnamed: 32', 'id'], axis=1)
@@ -326,21 +335,21 @@ with tab4:
 
 	def assistant(B, M):
 		openai.api_key = "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"
-		prompt = f
+		prompt = f"""
 
-		I build an app with Wisconsin breast cancer diagnosis and used machine learning to give you these results, now I want you to be in the role of assistant within that app and generate general guidelines on what should he/she do when I give you the percentage
-		now generate guidelines for these predictions as you are talking to the patient:
+#	We built an app with the Wisconsin breast cancer dataset and used machine learning to provide these results, now we want you to be in the role of assistant within that app and generate general guidelines on what they should do when we give you the percentage.
+#	Now generate guidelines for these predictions as if you are talking to the patient:
 
-		Prediction Results:
-		Malignant Probability: {M}
-		Benign Probability: {B}
+#	Prediction Results:
+#	Malignant Probability: {M}
+#	Benign Probability: {B}
 
 
 		response = openai.Completion.create(
-			model="text-davinci-003",
-			prompt=prompt,
-			temperature=0.6,
-			max_tokens = 400
+		model="text-davinci-003",
+		prompt=prompt,
+		temperature=0.6,
+		max_tokens = 400
 		)
 
 		guidelines = response.choices[0].text.strip()
