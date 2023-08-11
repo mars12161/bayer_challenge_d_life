@@ -1,7 +1,15 @@
+"""
+03.08.2023
+Data Dashboard Wisconsin Breast Cancer Data
+Bayer Challenge Team D Life
+"""
+
 import streamlit as st
 import pandas as pd
 import numpy as np
 import seaborn as sns
+from pandasai import PandasAI
+from pandasai.llm.openai import OpenAI
 import matplotlib.pyplot as plt
 from PIL import Image
 import plotly.express as px
@@ -17,6 +25,39 @@ from sklearn.svm import SVC
 from sklearn.ensemble import VotingClassifier
 from sklearn.metrics import RocCurveDisplay, auc, plot_roc_curve, plot_precision_recall_curve
 #from sklearn import metrics
+
+
+def ask_pandas():
+    llm = OpenAI(api_token='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')
+    pandasai = PandasAI(llm)
+    with st.form("Question"):
+        question = st.text_input("Question", value="", type="default")
+        submitted = st.form_submit_button("Submit")
+        if submitted:
+            with st.spinner("Thinking..."):
+                answer = pandasai.run(df, prompt=question)
+
+                fig = plt.gcf()
+                if fig.get_axes():
+                    st.pyplot(fig)
+                st.write(answer)
+
+def create_tabs():
+    tab1, tab2, tab3 = st.tabs(['Overview', 'AI', 'Predictions'])
+
+    with tab1:
+        st.header("Data Overview")
+
+    with tab2:
+        st.header("Ask the AI")
+        st.write("Here you can ask the AI a question about the data")
+        ask_pandas()
+
+    with tab3:
+        st.header("Predictions")
+
+def main():
+    create_tabs()
 
 st.title('Breast Cancer Dataset')
 
@@ -34,11 +75,11 @@ st.markdown(
 	""", unsafe_allow_html=True
 )
 
-with st.sidebar:
+"""with st.sidebar:
 	image = Image.open('images/bc_awareness.png')
 	st.image(image, width=100)
 	selected = option_menu("Menu", ['Information', 'Exploratory Analysis', 'Machine Learning', 'Sources'])
-	selected
+	selected"""
 
 cd_2018 = pd.read_csv('./cd_2018.csv')
 df = pd.read_csv('./dataset_factorised.csv')
@@ -192,3 +233,6 @@ if 'Sources' in selected:
 		 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7950292/,\n\
 		 https://canceratlas.cancer.org/,  \nhttps://ourworldindata.org/cancer  \n")
 	
+
+if __name__ == "__main__":
+    main()
