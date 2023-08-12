@@ -169,7 +169,7 @@ def assistant(B, M):
 
   openai.api_key = "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"
 
-  prompt = f"""
+  prompt = f
 
 I build an app with Wisconsin breast cancer diagnosis and used machine learning to give you these results, now I want you to be in the role of assistant within that app and generate general guidelines on what should he/she do when I give you the percentage
 now generate guidelines for these predictions as you are talking to the patient:
@@ -177,7 +177,7 @@ now generate guidelines for these predictions as you are talking to the patient:
 Prediction Results:
 Malignant Probability: {M}
 Benign Probability: {B}
-"""
+
 
   response = openai.Completion.create(
     model="text-davinci-003",
