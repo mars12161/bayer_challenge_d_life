@@ -48,21 +48,23 @@ def add_sidebar():
 
 def get_radar_chart(input_data):
 	categories = ['Radius', 'Perimeter', 'Area', 'Concave Points']
+	data_mean = X_train_rfc[['radius_mean', 'perimeter_mean', 'concave_points_mean']]
+	data_worst = X_train_rfc[['radius_worst', 'area_worst', 'concave_points_worst']]
 	fig = go.Figure()
 	fig.add_trace(go.Scatterpolar(
-		r=[X_train_rfc[['radius_mean', 'perimeter_mean', 'concave_points_mean']]],
+		r= data_mean.values,
 		theta=categories,
 		fill='toself',
 		name='Mean Value'
 	))
 	fig.add_trace(go.Scatterpolar(
-		r=[X_train_rfc['area_se']],
+		r=X_train_rfc['area_se'].values,
 		theta=categories,
 		fill='toself',
 		name='Standard Error'
 	))
-	fig.add_trace(go.Scatterpolar(
-		r=[X_train_rfc[['radius_worst', 'area_worst', 'concave_points_worst']]],
+	fig.add_trace(go.Scatterpolar(		
+		r = data_worst.values,
 		theta=categories,
 		fill='toself',
 		name='Worst Value'

@@ -5,9 +5,12 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from PIL import Image
 import plotly.express as px
+import plotly.graph_objects as go
+import pickle
 from streamlit_option_menu import option_menu
 from streamlit_extras.switch_page_button import switch_page
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier 
 from sklearn.metrics import precision_score, recall_score, f1_score
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
@@ -29,7 +32,9 @@ st.markdown(
 			margin-left: auto;
 			margin-right: auto;
 			width: 100%;
-		}
+		[data-testid="stSidebar"] {
+			width: 200px; 
+			}
 	</style>
 	""", unsafe_allow_html=True
 )
@@ -87,7 +92,7 @@ def ml_model(model, X_train, y_train, X_test, y_test):
 	st.subheader("Test Scores")
 	st.write(results_model_test)
 
-if 'Information' in selected:
+def information_tab():
 	st.subheader('Information')
 	st.markdown("An estimated 2.1 million people were diagnosed with breast cancer \
 		in 2018 worldwide.  It is the second leading cause of death by cancer in females (leading \
@@ -109,7 +114,7 @@ if 'Information' in selected:
 					 color_continuous_scale = px.colors.sequential.Sunsetdark)
 	st.plotly_chart(fig)
 	
-if 'Exploratory Analysis' in selected:
+def exploratory_analysis_tab():
 	st.subheader('Exploratory Analysis')
 	#divide feature names into groups
 	mean_features= ['radius_mean','texture_mean','perimeter_mean',\
@@ -158,15 +163,12 @@ if 'Exploratory Analysis' in selected:
 		if 'Worst Features' in option_2: 
 			sns.heatmap(df_corr[worst_features].corr(), ax=ax)
 			st.write(fig)
-if 'Machine Learning' in selected:
+def machine_learning_tab():
 	st.subheader('Machine Learning')
 	st.write("All machine learning models were trained using an 80/20 split on stratified data that was standardised using StandardScaler.")
 	st.subheader('ROC and AUC for All Models')
 	image_all_ROC = Image.open('./images/All_Models_ROC.png')
 	st.image(image_all_ROC)
-#	st.subheader('Precision and Recall for All Models')
-#	image_all_pr = Image.open('./images/All_Models_precisionrecall.png')
-#	st.image(image_all_pr)
 	option_3 = st.selectbox('**Please select a model you would like to explore further:**', ('Random Forest Classifier', 'Logistic Regression', 'Support Vector Machine', 'Ensemble Model'))
 	if 'Random Forest Classifier' in option_3: 
 		st.subheader("Random Forest Classifier (or RFC)")
@@ -215,7 +217,7 @@ if 'Machine Learning' in selected:
 		st.image(image_lr_precision)
 	if 'Support Vector' in option_3: 
 		st.markdown("A **Support Vector** model was used with the following parameters: decision_function_shape='ovo', probability=True \
-	      and using the reduced features resulting from the logistic regression model.")
+		  and using the reduced features resulting from the logistic regression model.")
 		st.markdown("Training Score Results before any feature elimination was:\n\
 			accuracy: 1.0, precision: 0.982, recall: 0.996, and F1: 0.999")
 		svm = SVC(decision_function_shape='ovo', probability=True)
@@ -248,7 +250,7 @@ if 'Machine Learning' in selected:
 		image_em_precision = Image.open('./images/em_precision_recall.png')
 		st.image(image_em_precision)
 
-if 'Sources' in selected:
+def sources_tab():
 	st.subheader('Dataset')
 	st.markdown("http://archive.ics.uci.edu/dataset/17/breast+cancer+wisconsin+diagnostic")
 	st.subheader('Sources')
@@ -256,5 +258,186 @@ if 'Sources' in selected:
 		 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7950292/,\n\
 		 https://canceratlas.cancer.org/,  \nhttps://ourworldindata.org/cancer  \n")
 
-if 'Predictions' in selected:
+def predictions_tab():
 	st.subheader('Predictions')
+	def get_clean_data():
+		data = pd.read_csv("./data/data.csv")
+		data = data.drop(['Unnamed: 32', 'id'], axis=1)
+		data['diagnosis'] = data['diagnosis'].map({ 'M': 1, 'B': 0 })
+		return data
+
+	def add_info():
+		st.subheader("Cell Nuclei Measurements")
+
+		data = get_clean_data()
+
+		slider_labels = [
+			("Radius (mean)", "radius_mean"),
+			("Texture (mean)", "texture_mean"),
+			("Perimeter (mean)", "perimeter_mean"),
+			("Area (mean)", "area_mean"),
+			("Smoothness (mean)", "smoothness_mean"),
+			("Compactness (mean)", "compactness_mean"),
+			("Concavity (mean)", "concavity_mean"),
+			("Concave points (mean)", "concave points_mean"),
+			("Symmetry (mean)", "symmetry_mean"),
+			("Fractal dimension (mean)", "fractal_dimension_mean"),
+			("Radius (se)", "radius_se"),
+			("Texture (se)", "texture_se"),
+			("Perimeter (se)", "perimeter_se"),
+			("Area (se)", "area_se"),
+			("Smoothness (se)", "smoothness_se"),
+			("Compactness (se)", "compactness_se"),
+			("Concavity (se)", "concavity_se"),
+			("Concave points (se)", "concave points_se"),
+			("Symmetry (se)", "symmetry_se"),
+			("Fractal dimension (se)", "fractal_dimension_se"),
+			("Radius (worst)", "radius_worst"),
+			("Texture (worst)", "texture_worst"),
+			("Perimeter (worst)", "perimeter_worst"),
+			("Area (worst)", "area_worst"),
+			("Smoothness (worst)", "smoothness_worst"),
+			("Compactness (worst)", "compactness_worst"),
+			("Concavity (worst)", "concavity_worst"),
+			("Concave points (worst)", "concave points_worst"),
+			("Symmetry (worst)", "symmetry_worst"),
+			("Fractal dimension (worst)", "fractal_dimension_worst"),
+		]
+
+		input_dict = {}
+
+		for label, key in slider_labels:
+			input_dict[key] = st.slider(label, min_value = float(0), max_value = float(data[key].max()), 
+				value = float(data[key].mean())
+			)
+		return input_dict
+
+
+	def get_scaled_values(input_dict):
+		data = get_clean_data()
+		X = data.drop(['diagnosis'], axis=1)
+		scaled_dict = {}
+
+		for key, value in input_dict.items():
+			max_val = X[key].max()
+			min_val = X[key].min()
+			scaled_value = (value - min_val) / (max_val - min_val)
+			scaled_dict[key] = scaled_value
+		return scaled_dict
+
+	def get_radar_chart(input_data):
+		input_data = get_scaled_values(input_data)
+
+		categories = ['Radius', 'Texture', 'Perimeter', 'Area', 
+				'Smoothness', 'Compactness', 
+				'Concavity', 'Concave Points',
+				'Symmetry', 'Fractal Dimension']
+
+		fig = go.Figure()
+
+		fig.add_trace(go.Scatterpolar(
+			r=[
+			input_data['radius_mean'], input_data['texture_mean'], input_data['perimeter_mean'],
+			input_data['area_mean'], input_data['smoothness_mean'], input_data['compactness_mean'],
+			input_data['concavity_mean'], input_data['concave points_mean'], input_data['symmetry_mean'],
+			input_data['fractal_dimension_mean']
+			],
+			theta=categories,
+			fill='toself',
+			name='Mean Value'
+		))
+		fig.add_trace(go.Scatterpolar(
+			r=[
+			input_data['radius_se'], input_data['texture_se'], input_data['perimeter_se'], input_data['area_se'],
+			input_data['smoothness_se'], input_data['compactness_se'], input_data['concavity_se'],
+			input_data['concave points_se'], input_data['symmetry_se'],input_data['fractal_dimension_se']
+			],
+			theta=categories,
+			fill='toself',
+			name='Standard Error'
+		))
+		fig.add_trace(go.Scatterpolar(
+			r=[
+			input_data['radius_worst'], input_data['texture_worst'], input_data['perimeter_worst'],
+			input_data['area_worst'], input_data['smoothness_worst'], input_data['compactness_worst'],
+			input_data['concavity_worst'], input_data['concave points_worst'], input_data['symmetry_worst'],
+			input_data['fractal_dimension_worst']
+			],
+			theta=categories,
+			fill='toself',
+			name='Worst Value'
+		))
+		fig.update_layout(
+			polar = dict(radialaxis = dict(visible = True,range = [0, 1])),
+			showlegend = True
+			)
+		return fig
+
+	def add_predictions(input_data):
+		model = pickle.load(open("./model/lr.pkl", "rb"))
+		scaler = StandardScaler()  
+		input_array = np.array(list(input_data.values())).reshape(1, -1)
+		input_array_scaled = scaler.fit_transform(input_array)
+		prediction = model.predict(input_array_scaled)
+		st.subheader("Cell cluster prediction")
+		st.write("The cell cluster is:")
+
+		if prediction[0] == 0:
+			st.write("<span class='diagnosis benign'>Benign</span>", unsafe_allow_html=True)
+		else:
+			st.write("<span class='diagnosis malignant'>Malignant</span>", unsafe_allow_html=True)
+
+		st.write("Probability of being benign: ",model.predict_proba(input_array_scaled)[0][0])
+		st.write("Probability of being malignant: ", model.predict_proba(input_array_scaled)[0][1])
+		st.write("This app can assist medical professionals in making a diagnosis, but should not be used as a substitute for a professional diagnosis.")
+		return (model.predict_proba(input_array_scaled)[0][0], model.predict_proba(input_array_scaled)[0][1])
+
+	def assistant(B, M):
+		openai.api_key = "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"
+		prompt = (
+			"I build an app with Wisconsin breast cancer diagnosis and used machine learning to give you these results, "
+			"now I want you to be in the role of assistant within that app and generate general guidelines "
+			"on what should he/she do when I give you the percentage now generate guidelines for these predictions "
+			"as you are talking to the patient:\n"
+			f"Prediction Results:\nMalignant Probability: {M}\nBenign Probability: {B}"
+			)
+		response = openai.Completion.create(
+			model="text-davinci-003",
+			prompt=prompt,
+			temperature=0.6,
+			max_tokens = 400
+			)
+		guidelines = response.choices[0].text.strip()
+		return(guidelines)
+	with st.container():
+		st.write("Please connect this app to your cytology lab to help diagnose breast cancer form your tissue sample. This app uses a logistic regression machine learning model to predict whether a breast mass is benign or malignant based on the measurements provided from your cytosis lab. You can also update the measurements by hand using the sliders in the sidebar. ")
+
+	col1, col2 = st.columns([1, 3])
+	with col1:
+		input_data = add_info()
+	with col2:
+		radar_chart = get_radar_chart(input_data)
+		st.plotly_chart(radar_chart)
+		st.write("---")
+	B , M = add_predictions(input_data)
+	st.header("Ask the AI")
+	st.write("Here you can ask the AI a question about the data")
+	if st.button('Generate guidlines!'):
+		with col2:
+			st.write(assistant(B, M))
+
+def main():
+	if 'Information' in selected:
+		information_tab()
+	if 'Exploratory Analysis' in selected:
+		exploratory_analysis_tab()
+	if 'Machine Learning' in selected:
+		machine_learning_tab()
+	if 'Sources' in selected:
+		sources_tab()
+	if 'Predictions' in selected:
+		 predictions_tab()
+
+	
+if __name__ == '__main__':
+	main()
