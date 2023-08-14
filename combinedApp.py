@@ -29,7 +29,7 @@ export_path = os.path.join(os.getcwd(), 'exports')
 
 st.set_page_config(
 	page_title="Breast Cancer Dataset",
-	page_icon=":female-doctor:",
+	page_icon="👩‍⚕️",
 	layout="wide",
 	initial_sidebar_state="expanded")
 
