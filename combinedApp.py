@@ -23,8 +23,15 @@ from sklearn.metrics import RocCurveDisplay, auc, plot_roc_curve, plot_precision
 #from sklearn import metrics
 from pandasai import PandasAI
 from pandasai.llm.openai import OpenAI
+import openai
 
 export_path = os.path.join(os.getcwd(), 'exports')
+
+st.set_page_config(
+	page_title="Breast Cancer Dataset",
+	page_icon=":female-doctor:",
+	layout="wide",
+	initial_sidebar_state="expanded")
 
 st.title('Breast Cancer Dataset')
 
@@ -425,11 +432,11 @@ def predictions_tab():
 		st.plotly_chart(radar_chart)
 		st.write("---")
 	B , M = add_predictions(input_data)
+	st.write("---")
 	st.header("Ask the AI")
 	st.write("Here you can ask the AI a question about the data")
-	if st.button('Generate guidlines!'):
-		with col2:
-			st.write(assistant(B, M))
+	if st.button('Generate guidelines!'):
+		st.write(assistant(B, M))
 
 
 def find_exported_files(path):
