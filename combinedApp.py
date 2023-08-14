@@ -24,6 +24,8 @@ from sklearn.metrics import RocCurveDisplay, auc, plot_roc_curve, plot_precision
 from pandasai import PandasAI
 from pandasai.llm.openai import OpenAI
 
+export_path = os.path.join(os.getcwd(), 'exports')
+
 st.title('Breast Cancer Dataset')
 
 st.markdown(
@@ -430,9 +432,7 @@ def predictions_tab():
 			st.write(assistant(B, M))
 
 
-def find_exported_files():
-	path = os.path.join(os.getcwd(), 'exports')
-
+def find_exported_files(path):
 	for root, dirs, files in os.walk(path):
 		for file in files:
 			if file.endswith(".png") and file != 'figure2.png' and file != 'bc_awareness.png':
@@ -442,7 +442,7 @@ def find_exported_files():
 
 def ask_pandas():
     llm = OpenAI(api_token='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')
-    pandasai = PandasAI(llm, save_charts=True, save_charts_path=path, verbose=True)
+    pandasai = PandasAI(llm, save_charts=True, save_charts_path=export_path, verbose=True)
     with st.form("Question"):
         question = st.text_input("Question", value="", type="default")
         submitted = st.form_submit_button("Submit")
@@ -452,7 +452,7 @@ def ask_pandas():
                 st.write(answer)
 
                 # Plotting
-                chart_file = find_exported_files()
+                chart_file = find_exported_files(export_path)
                 if chart_file:
                     st.image(chart_file)
                     os.remove(chart_file)
