@@ -431,12 +431,12 @@ def predictions_tab():
 		radar_chart = get_radar_chart(input_data)
 		st.plotly_chart(radar_chart)
 		st.write("---")
-	B , M = add_predictions(input_data)
-	st.write("---")
-	st.header("Ask the AI")
-	st.write("Here you can ask the AI a question about the data")
-	if st.button('Generate guidelines!'):
-		st.write(assistant(B, M))
+		B , M = add_predictions(input_data)
+		st.write("---")
+		st.header("Ask the AI")
+		st.write("Here you can ask the AI a question about the data")
+		if st.button('Generate guidelines!'):
+			st.write(assistant(B, M))
 
 
 def find_exported_files(path):
