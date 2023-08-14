@@ -26,8 +26,6 @@ from pandasai.llm.openai import OpenAI
 
 st.title('Breast Cancer Dataset')
 
-path = os.getcwd()
-
 st.markdown(
 	"""
 	<style>
@@ -433,11 +431,13 @@ def predictions_tab():
 
 
 def find_exported_files():
-    for root, dirs, files in os.walk(path):
-        for file in files:
-            if file.endswith(".png") and file != 'figure2.png' and file != 'bc_awareness.png':
-                return os.path.join(root, file)
-    return None
+	path = os.path.join(os.getcwd(), 'exports')
+
+	for root, dirs, files in os.walk(path):
+		for file in files:
+			if file.endswith(".png") and file != 'figure2.png' and file != 'bc_awareness.png':
+				return os.path.join(root, file)
+	return None
 
 
 def ask_pandas():
