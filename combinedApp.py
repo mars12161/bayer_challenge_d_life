@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 import pandas as pd
 import numpy as np
 import seaborn as sns
@@ -20,8 +21,12 @@ from sklearn.svm import SVC
 from sklearn.ensemble import VotingClassifier
 from sklearn.metrics import RocCurveDisplay, auc, plot_roc_curve, plot_precision_recall_curve
 #from sklearn import metrics
+from pandasai import PandasAI
+from pandasai.llm.openai import OpenAI
 
 st.title('Breast Cancer Dataset')
+
+path = os.getcwd()
 
 st.markdown(
 	"""
@@ -42,7 +47,7 @@ st.markdown(
 with st.sidebar:
 	image = Image.open('images/bc_awareness.png')
 	st.image(image, width=100)
-	selected = option_menu("Menu", ['Information', 'Exploratory Analysis', 'Machine Learning', 'Predictions', 'Sources'])
+	selected = option_menu("Menu", ['Information', 'Exploratory Analysis', 'Machine Learning', 'Predictions', 'Ask the AI', 'Sources'])
 	selected
 
 cd_2018 = pd.read_csv('./data/cd_2018.csv') #data needed for map
@@ -426,6 +431,32 @@ def predictions_tab():
 		with col2:
 			st.write(assistant(B, M))
 
+
+def find_exported_files():
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            if file.endswith(".png") and file != 'figure2.png' and file != 'bc_awareness.png':
+                return os.path.join(root, file)
+    return None
+
+
+def ask_pandas():
+    llm = OpenAI(api_token='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')
+    pandasai = PandasAI(llm, save_charts=True, save_charts_path=path, verbose=True)
+    with st.form("Question"):
+        question = st.text_input("Question", value="", type="default")
+        submitted = st.form_submit_button("Submit")
+        if submitted:
+            with st.spinner("PandasAI is thinking..."):
+                answer = pandasai.run(df, prompt=question)
+                st.write(answer)
+
+                # Plotting
+                chart_file = find_exported_files()
+                if chart_file:
+                    st.image(chart_file)
+                    #os.remove(chart_file)
+
 def main():
 	if 'Information' in selected:
 		information_tab()
@@ -437,6 +468,8 @@ def main():
 		sources_tab()
 	if 'Predictions' in selected:
 		 predictions_tab()
+	if 'AI' in selected:
+		ask_pandas()
 
 	
 if __name__ == '__main__':
