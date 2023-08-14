@@ -455,7 +455,7 @@ def ask_pandas():
                 chart_file = find_exported_files()
                 if chart_file:
                     st.image(chart_file)
-                    #os.remove(chart_file)
+                    os.remove(chart_file)
 
 def main():
 	if 'Information' in selected:
