@@ -474,7 +474,7 @@ def main():
 	if 'Sources' in selected:
 		sources_tab()
 	if 'Predictions' in selected:
-		 predictions_tab()
+		predictions_tab()
 	if 'AI' in selected:
 		ask_pandas()
 
