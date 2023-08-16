@@ -272,9 +272,16 @@ def sources_tab():
 def predictions_tab():
 	st.subheader('Predictions')
 	X_LR_fe = pd.read_csv('./data/X_LR_feature_reduction.csv')
+#	def get_clean_data():
+#		data = pd.read_csv("./data/data.csv")
+#		data = data.drop(['Unnamed: 32', 'id'], axis=1)
+#		data['diagnosis'] = data['diagnosis'].map({ 'M': 1, 'B': 0 })
+#		return data
 
 	def add_info():
 		st.subheader("Cell Nuclei Measurements")
+
+#		data = get_clean_data()
 
 		slider_labels = [
 			("Concavity (mean)", "concavity_mean"),
@@ -289,11 +296,43 @@ def predictions_tab():
 			("Concavity (worst)", "concavity_worst"),
 			("Concave points (worst)", "concave_points_worst"),
 			("Symmetry (worst)", "symmetry_worst"),
+#			("Radius (mean)", "radius_mean"),
+#			("Texture (mean)", "texture_mean"),
+#			("Perimeter (mean)", "perimeter_mean"),
+#			("Area (mean)", "area_mean"),
+#			("Smoothness (mean)", "smoothness_mean"),
+#			("Compactness (mean)", "compactness_mean"),
+#			("Concavity (mean)", "concavity_mean"),
+#			("Concave points (mean)", "concave points_mean"),
+#			("Symmetry (mean)", "symmetry_mean"),
+#			("Fractal dimension (mean)", "fractal_dimension_mean"),
+#			("Radius (se)", "radius_se"),
+#			("Texture (se)", "texture_se"),
+#			("Perimeter (se)", "perimeter_se"),
+#			("Area (se)", "area_se"),
+#			("Smoothness (se)", "smoothness_se"),
+#			("Compactness (se)", "compactness_se"),
+#			("Concavity (se)", "concavity_se"),
+#			("Concave points (se)", "concave points_se"),
+#			("Symmetry (se)", "symmetry_se"),
+#			("Fractal dimension (se)", "fractal_dimension_se"),
+#			("Radius (worst)", "radius_worst"),
+#			("Texture (worst)", "texture_worst"),
+#			("Perimeter (worst)", "perimeter_worst"),
+#			("Area (worst)", "area_worst"),
+#			("Smoothness (worst)", "smoothness_worst"),
+#			("Compactness (worst)", "compactness_worst"),
+#			("Concavity (worst)", "concavity_worst"),
+#			("Concave points (worst)", "concave points_worst"),
+#			("Symmetry (worst)", "symmetry_worst"),
+#			("Fractal dimension (worst)", "fractal_dimension_worst"),
 		]
 
 		input_dict = {}
 
 		for label, key in slider_labels:
+#			input_dict[key] = st.slider(label, min_value = float(0), max_value = float(data[key].max()), 
+#				value = float(data[key].mean())
 			input_dict[key] = st.slider(label, min_value = float(0), max_value = float(X_LR_fe[key].max()), 
 				value = float(X_LR_fe[key].mean())
 			)
@@ -301,9 +340,13 @@ def predictions_tab():
 
 
 	def get_scaled_values(input_dict):
+#		data = get_clean_data()
+#		X = data.drop(['diagnosis'], axis=1)
 		scaled_dict = {}
 
 		for key, value in input_dict.items():
+#			max_val = X[key].max()
+#			min_val = X[key].min()
 			max_val = X_LR_fe[key].max()
 			min_val = X_LR_fe[key].min()
 			scaled_value = (value - min_val) / (max_val - min_val)
@@ -315,14 +358,20 @@ def predictions_tab():
 		input_data = get_scaled_values(input_data)
 
 		categories = ['Radius', 'Texture', 'Perimeter', 'Area', 
-				'Concavity', 'Concave Points', 'Symmetry'
+			#	'Smoothness', 'Compactness', 
+				'Concavity', 'Concave Points',
+				'Symmetry' #'Fractal Dimension'
 				]
 
 		fig = go.Figure()
 
 		fig.add_trace(go.Scatterpolar(
 			r=[
-			input_data['concavity_mean'], input_data['concave_points_mean']
+			input_data['concavity_mean'], input_data['concave_points_mean'],0
+#			input_data['radius_mean'], input_data['texture_mean'], input_data['perimeter_mean'],
+#			input_data['area_mean'], input_data['smoothness_mean'], input_data['compactness_mean'],
+#			input_data['concavity_mean'], input_data['concave points_mean'], input_data['symmetry_mean'],
+#			input_data['fractal_dimension_mean']
 			],
 			theta=categories,
 			fill='toself',
@@ -330,7 +379,10 @@ def predictions_tab():
 		))
 		fig.add_trace(go.Scatterpolar(
 			r=[
-			input_data['radius_se'], input_data['perimeter_se'], input_data['area_se']
+			input_data['radius_se'], input_data['perimeter_se'], input_data['area_se'], 0
+#			input_data['radius_se'], input_data['texture_se'], input_data['perimeter_se'], input_data['area_se'],
+#			input_data['smoothness_se'], input_data['compactness_se'], input_data['concavity_se'],
+#			input_data['concave points_se'], input_data['symmetry_se'],input_data['fractal_dimension_se']
 			],
 			theta=categories,
 			fill='toself',
@@ -341,6 +393,10 @@ def predictions_tab():
 			input_data['radius_worst'], input_data['texture_worst'], input_data['perimeter_worst'],
 			input_data['area_worst'], input_data['concavity_worst'], input_data['concave_points_worst'], 
 			input_data['symmetry_worst']
+#			input_data['radius_worst'], input_data['texture_worst'], input_data['perimeter_worst'],
+#			input_data['area_worst'], input_data['smoothness_worst'], input_data['compactness_worst'],
+#			input_data['concavity_worst'], input_data['concave points_worst'], input_data['symmetry_worst'],
+#			input_data['fractal_dimension_worst']
 			],
 			theta=categories,
 			fill='toself',
@@ -355,15 +411,8 @@ def predictions_tab():
 	def add_predictions(input_data):
 		model = pickle.load(open("./model/lr2.pkl", "rb"))
 		scaler = StandardScaler()  
-
-#new
-		input_dict = get_scaled_values(input_data)
-		input_df = pd.DataFrame([input_dict])
-		input_array_scaled = scaler.fit_transform(input_df)
-		prediction = model.predict(input_array_scaled)
-
-#		input_array = np.array(list(input_data.values())).reshape(1, -1)
-#		input_array_scaled = scaler.fit_transform(input_array)
+		input_array = np.array(list(input_data.values())).reshape(1, -1)
+		input_array_scaled = scaler.fit_transform(input_array)
 		prediction = model.predict(input_array_scaled)
 		st.subheader("Cell cluster prediction")
 		st.write("The cell cluster is:")
