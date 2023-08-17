@@ -9,6 +9,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pickle
 import streamlit.components.v1 as components
+import shap
 
 from streamlit_option_menu import option_menu
 from streamlit_extras.switch_page_button import switch_page
@@ -21,8 +22,13 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
 from sklearn.ensemble import VotingClassifier
+from sklearn.metrics import RocCurveDisplay, auc
+from sklearn.metrics import precision_recall_curve, PrecisionRecallDisplay
+from explainerdashboard import *
+from explainerdashboard.custom import *
+
 from sklearn.metrics import RocCurveDisplay, auc, plot_roc_curve, plot_precision_recall_curve
-#from sklearn import metrics
+from sklearn import metrics
 from pandasai import PandasAI
 from pandasai.llm.openai import OpenAI
 import openai
@@ -266,7 +272,8 @@ def machine_learning_tab():
 	if 'Model Explainer Dashboard' in option_3:
 		st.markdown("A **hub of interactive dashboards** for analyzing and explaining the predictions.")
 		st.components.v1.iframe("http://172.20.10.3:8050", width=None, height=900, scrolling=True)
-
+		
+		
 def sources_tab():
 	st.subheader('Dataset')
 	st.markdown("http://archive.ics.uci.edu/dataset/17/breast+cancer+wisconsin+diagnostic")
