@@ -8,6 +8,8 @@ from PIL import Image
 import plotly.express as px
 import plotly.graph_objects as go
 import pickle
+import streamlit.components.v1 as components
+
 from streamlit_option_menu import option_menu
 from streamlit_extras.switch_page_button import switch_page
 from sklearn.model_selection import train_test_split
@@ -180,7 +182,7 @@ def machine_learning_tab():
 	st.subheader('ROC and AUC for All Models')
 	image_all_ROC = Image.open('./images/All_Models_ROC.png')
 	st.image(image_all_ROC)
-	option_3 = st.selectbox('**Please select a model you would like to explore further:**', ('Random Forest Classifier', 'Logistic Regression', 'Support Vector Machine', 'Ensemble Model'))
+	option_3 = st.selectbox('**Please select a model you would like to explore further:**', ('Random Forest Classifier', 'Logistic Regression', 'Support Vector Machine', 'Ensemble Model', 'Model Explainer Dashboard'))
 	if 'Random Forest Classifier' in option_3: 
 		st.subheader("Random Forest Classifier (or RFC)")
 		st.markdown("A **Random Forest Classifier** model was used with the following variables: \n\
@@ -260,6 +262,10 @@ def machine_learning_tab():
 		st.subheader("Precision-Recall Curve on Test Data")
 		image_em_precision = Image.open('./images/em_precision_recall.png')
 		st.image(image_em_precision)
+  # link to dashboard here
+	if 'Model Explainer Dashboard' in option_3:
+		st.markdown("A **hub of interactive dashboards** for analyzing and explaining the predictions.")
+  		st.components.v1.iframe("http://172.20.10.3:8050", width=None, height=900, scrolling=True)
 
 def sources_tab():
 	st.subheader('Dataset')
