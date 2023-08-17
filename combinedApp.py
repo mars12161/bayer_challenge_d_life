@@ -265,7 +265,7 @@ def machine_learning_tab():
   # link to dashboard here
 	if 'Model Explainer Dashboard' in option_3:
 		st.markdown("A **hub of interactive dashboards** for analyzing and explaining the predictions.")
-  		st.components.v1.iframe("http://172.20.10.3:8050", width=None, height=900, scrolling=True)
+		st.components.v1.iframe("http://172.20.10.3:8050", width=None, height=900, scrolling=True)
 
 def sources_tab():
 	st.subheader('Dataset')
