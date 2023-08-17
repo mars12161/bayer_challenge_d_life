@@ -9,8 +9,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pickle
 import streamlit.components.v1 as components
-import shap
-
 from streamlit_option_menu import option_menu
 from streamlit_extras.switch_page_button import switch_page
 from sklearn.model_selection import train_test_split
