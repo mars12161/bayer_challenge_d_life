@@ -183,90 +183,10 @@ def machine_learning_tab():
 	st.subheader('ROC and AUC for All Models')
 	image_all_ROC = Image.open('./images/All_Models_ROC.png')
 	st.image(image_all_ROC)
-	option_3 = st.selectbox('**Please select a model you would like to explore further:**', ('Random Forest Classifier', 'Logistic Regression', 'Support Vector Machine', 'Ensemble Model', 'Model Explainer Dashboard'))
-	if 'Random Forest Classifier' in option_3: 
-		st.subheader("Random Forest Classifier (or RFC)")
-		st.markdown("A **Random Forest Classifier** model was used with the following variables: \n\
-			n_estimators = 4, max_depth = 8 \nwhich was chosen due to the results of a GridSearch \
-			Hyperparameter Optimization model using precision as a scoring metric on the full dataset.")
-		st.write("Training Score Results before any feature elimination was: \n\
-			accuracy: 1.0, precision: 0.996, recall: 0.989, and F1: 0.992\n")
-		st.write("We reviewed the feature importance in SKlearn. We then eliminated all \
-			features that had a coefficient value less than 0.025 and reran the RFC model to compare the outcome.")
-		image_rfc_feat = Image.open('./images/rfc_features.png')
-		st.image(image_rfc_feat)
-		st.subheader("Random Forest Classifier (or RFC) with Feature Elimination")
-		rfc = RandomForestClassifier(n_estimators=4, max_depth=8, random_state = 12)
-		ml_model(rfc, X_train_fr_rfc, y_train, X_test_fr_rfc, y_test)
-		st.subheader("Confusion Matrix on Test Data")
-		image_rfc = Image.open('./images/rfc_feature_elim_confusion_matrix.png')
-		st.image(image_rfc)
-		st.subheader("ROC Curve on Test Data")
-		st.write("The ROC and AUC are run on the test data after the model has been trained.")
-		image_rfc_ROC = Image.open('./images/rfc_ROC.png')
-		st.image(image_rfc_ROC)
-		st.subheader("Precision-Recall Curve on Test Data")
-		image_rfc_precision = Image.open('./images/rfc_precision_recall.png')
-		st.image(image_rfc_precision)
-	if 'Logistic Regression' in option_3: 
-		st.markdown("A **Logistic Regression** model was used with the following solver = \
-			'liblinear'.")
-		st.markdown("Training Score Results before any feature elimination was:\n\
-			accuracy: 1.0, precision: 0.986, recall: 0.992, and F1: 0.999")
-		st.markdown("We then reviewed the feature importance for the model and decided to \
-			remove features that had a coefficient less than +/- 0.025")
-		image_lr_feat = Image.open('./images/lr_features.png')
-		st.image(image_lr_feat)
-		lr = LogisticRegression(solver='liblinear', random_state = 12) 
-		ml_model(lr, X_train_lr, y_train, X_test_lr, y_test)
-		st.subheader("Confusion Matrix on Test Data")
-		image_lr = Image.open('./images/lr_feature_elim_confusion_matrix.png')
-		st.image(image_lr)
-		st.subheader("ROC Curve on Test Data")
-		st.write("The ROC and AUC are run on the test data after the model has been trained.")
-		image_lr_ROC = Image.open('./images/lr_ROC.png')
-		st.image(image_lr_ROC)
-		st.subheader("Precision-Recall Curve on Test Data")
-		image_lr_precision = Image.open('./images/lr_precision_recall.png')
-		st.image(image_lr_precision)
-	if 'Support Vector' in option_3: 
-		st.markdown("A **Support Vector** model was used with the following parameters: decision_function_shape='ovo', probability=True \
-		  and using the reduced features resulting from the logistic regression model.")
-		st.markdown("Training Score Results before any feature elimination was:\n\
-			accuracy: 1.0, precision: 0.982, recall: 0.996, and F1: 0.999")
-		svm = SVC(decision_function_shape='ovo', probability=True)
-		ml_model(svm, X_train_lr, y_train, X_test_lr, y_test)
-		st.subheader("Confusion Matrix on Test Data")
-		image_svm = Image.open('./images/svm_feature_elim_confusion_matrix.png')
-		st.image(image_svm)
-		st.subheader("ROC Curve on Test Data")
-		st.write("The ROC and AUC are run on the test data after the model has been trained.")
-		image_svm_ROC = Image.open('./images/svm_ROC.png')
-		st.image(image_svm_ROC)
-		st.subheader("Precision-Recall Curve on Test Data")
-		image_svm_precision = Image.open('./images/svm_precision_recall.png')
-		st.image(image_svm_precision)
-	if 'Ensemble Model' in option_3: 
-		st.markdown("An **Ensemble Model** was used with the following parameters: LogisticRegression(solver='liblinear'), DecisionTreeClassifier, Support Vector Machine(kernel='rbf', probability=True), and a Voting Classifier(voting='soft')")
-		st.markdown("Training Score Results before any feature elimination was:\n\
-			accuracy: 1.0, precision: 0.99, recall: 1.0, and F1: 0.995")
-		models = [('logreg', LogisticRegression(solver='liblinear')), ('tree', DecisionTreeClassifier()), ('svm', SVC(kernel='rbf', probability=True))]
-		em = VotingClassifier(models, voting = 'soft')
-		ml_model(em, X_train_lr, y_train, X_test_lr, y_test)
-		st.subheader("Confusion Matrix on Test Data")
-		image_em = Image.open('./images/em_feature_elim_confusion_matrix.png')
-		st.image(image_em)
-		st.subheader("ROC Curve on Test Data")
-		st.write("The ROC and AUC are run on the test data after the model has been trained.")
-		image_em_ROC = Image.open('./images/em_ROC.png')
-		st.image(image_em_ROC)
-		st.subheader("Precision-Recall Curve on Test Data")
-		image_em_precision = Image.open('./images/em_precision_recall.png')
-		st.image(image_em_precision)
-  # link to dashboard here
-	if 'Model Explainer Dashboard' in option_3:
-		st.markdown("A **hub of interactive dashboards** for analyzing and explaining the predictions.")
-		st.components.v1.iframe("http://172.20.10.3:8050", width=None, height=900, scrolling=True)
+# link to dashboard here
+	st.subheader("Model Explainer Dashboard Using SHAP")
+	st.markdown("A **hub of interactive dashboards** for analyzing and explaining the predictions.")
+	st.components.v1.iframe("http://172.20.10.3:8050", width=None, height=900, scrolling=True)
 		
 		
 def sources_tab():
@@ -280,16 +200,9 @@ def sources_tab():
 def predictions_tab():
 	st.subheader('Predictions')
 	X_LR_fe = pd.read_csv('./data/X_LR_feature_reduction.csv')
-#	def get_clean_data():
-#		data = pd.read_csv("./data/data.csv")
-#		data = data.drop(['Unnamed: 32', 'id'], axis=1)
-#		data['diagnosis'] = data['diagnosis'].map({ 'M': 1, 'B': 0 })
-#		return data
 
 	def add_info():
 		st.subheader("Cell Nuclei Measurements")
-
-#		data = get_clean_data()
 
 		slider_labels = [
 			("Concavity (mean)", "concavity_mean"),
@@ -348,13 +261,10 @@ def predictions_tab():
 
 
 	def get_scaled_values(input_dict):
-#		data = get_clean_data()
-#		X = data.drop(['diagnosis'], axis=1)
 		scaled_dict = {}
 
 		for key, value in input_dict.items():
-#			max_val = X[key].max()
-#			min_val = X[key].min()
+
 			max_val = X_LR_fe[key].max()
 			min_val = X_LR_fe[key].min()
 			scaled_value = (value - min_val) / (max_val - min_val)
@@ -366,9 +276,8 @@ def predictions_tab():
 		input_data = get_scaled_values(input_data)
 
 		categories = ['Radius', 'Texture', 'Perimeter', 'Area', 
-			#	'Smoothness', 'Compactness', 
 				'Concavity', 'Concave Points',
-				'Symmetry' #'Fractal Dimension'
+				'Symmetry'
 				]
 
 		fig = go.Figure()
@@ -376,10 +285,6 @@ def predictions_tab():
 		fig.add_trace(go.Scatterpolar(
 			r=[
 			input_data['concavity_mean'], input_data['concave_points_mean'],0
-#			input_data['radius_mean'], input_data['texture_mean'], input_data['perimeter_mean'],
-#			input_data['area_mean'], input_data['smoothness_mean'], input_data['compactness_mean'],
-#			input_data['concavity_mean'], input_data['concave points_mean'], input_data['symmetry_mean'],
-#			input_data['fractal_dimension_mean']
 			],
 			theta=categories,
 			fill='toself',
@@ -388,9 +293,6 @@ def predictions_tab():
 		fig.add_trace(go.Scatterpolar(
 			r=[
 			input_data['radius_se'], input_data['perimeter_se'], input_data['area_se'], 0
-#			input_data['radius_se'], input_data['texture_se'], input_data['perimeter_se'], input_data['area_se'],
-#			input_data['smoothness_se'], input_data['compactness_se'], input_data['concavity_se'],
-#			input_data['concave points_se'], input_data['symmetry_se'],input_data['fractal_dimension_se']
 			],
 			theta=categories,
 			fill='toself',
@@ -401,10 +303,6 @@ def predictions_tab():
 			input_data['radius_worst'], input_data['texture_worst'], input_data['perimeter_worst'],
 			input_data['area_worst'], input_data['concavity_worst'], input_data['concave_points_worst'], 
 			input_data['symmetry_worst']
-#			input_data['radius_worst'], input_data['texture_worst'], input_data['perimeter_worst'],
-#			input_data['area_worst'], input_data['smoothness_worst'], input_data['compactness_worst'],
-#			input_data['concavity_worst'], input_data['concave points_worst'], input_data['symmetry_worst'],
-#			input_data['fractal_dimension_worst']
 			],
 			theta=categories,
 			fill='toself',
