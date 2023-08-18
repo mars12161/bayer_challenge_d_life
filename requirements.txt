@@ -9,3 +9,8 @@ pandasai==0.8.4
 openai==0.27.8
 streamlit_extras==0.3.0
 altair<5
+flask==2.3.2
+dash==2.11.1
+dash-bootstrap-components==1.4.2
+pygraphviz==1.11
+explainerdashboard==0.4.3

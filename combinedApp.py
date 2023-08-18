@@ -63,8 +63,8 @@ with st.sidebar:
 cd_2018 = pd.read_csv('./data/cd_2018.csv') #data needed for map
 df = pd.read_csv('./data/dataset_factorised.csv') #data needed for EDA
 X_scaler = pd.read_csv('./data/X_scaler.csv') #StandardScaler data
-#X_train_fr_rfc = pd.read_csv('./data/X_train_rfc_feature_elim.csv') #RFC feature elim.
-#X_test_fr_rfc = pd.read_csv('./data/X_test_rfc_feature_elim.csv') #RFC feature elim.
+X_train_fr_rfc = pd.read_csv('./data/X_train_rfc_feature_elim.csv') #RFC feature elim.
+X_test_fr_rfc = pd.read_csv('./data/X_test_rfc_feature_elim.csv') #RFC feature elim.
 X_train_lr = pd.read_csv('./data/X_train_lr.csv')
 X_test_lr = pd.read_csv('./data/X_test_lr.csv')
 
