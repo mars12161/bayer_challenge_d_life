@@ -22,11 +22,8 @@ from sklearn.svm import SVC
 from sklearn.ensemble import VotingClassifier
 from sklearn.metrics import RocCurveDisplay, auc
 from sklearn.metrics import precision_recall_curve, PrecisionRecallDisplay
-from explainerdashboard import *
-from explainerdashboard.custom import *
-
-from sklearn.metrics import RocCurveDisplay, auc, plot_roc_curve, plot_precision_recall_curve
 from sklearn import metrics
+from sklearn.metrics import RocCurveDisplay, auc, plot_roc_curve, plot_precision_recall_curve
 from pandasai import PandasAI
 from pandasai.llm.openai import OpenAI
 import openai
