@@ -55,6 +55,7 @@ scaler = pickle.load(open("./model/trained_scaler.pkl", "rb"))
 X_lr = pd.read_csv('./data/X_lr.csv',index_col= None)
 
 y = df['diagnosis']
+X_train, X_test, y_train, y_test = train_test_split(X_scaler,y, test_size = .20, random_state = 12,  stratify = y)
 Malignant=df[df['diagnosis'] == 0]
 Benign=df[df['diagnosis'] == 1]
 
@@ -183,9 +184,10 @@ def sources_tab():
 		 https://canceratlas.cancer.org/,  \nhttps://ourworldindata.org/cancer  \n")
 
 def predictions_tab():
-	st.subheader('Predictions')	
+	st.subheader('Predictions')
 	def add_info():
 		st.subheader("Cell Nuclei Measurements")
+
 		slider_labels = [
 			("Concavity (mean)", "concavity_mean"),
 			("Concave points (mean)", "concave_points_mean"),
@@ -227,7 +229,9 @@ def predictions_tab():
 		categories = ['Radius', 'Texture', 'Perimeter', 'Area', 
 				'Concavity', 'Concave Points', 'Symmetry'
 				]
+
 		fig = go.Figure()
+
 		fig.add_trace(go.Scatterpolar(
 			r=[
 			input_data['concavity_mean'], input_data['concave_points_mean'],0
@@ -260,11 +264,12 @@ def predictions_tab():
 			)
 		return fig
 
-	def add_predictions(input_data):
+	def add_predictions(input_data): 
 		input_array = np.array(list(input_data.values())).reshape(1, -1)
 		input_array_scaled = scaler.transform(input_array)
 		prediction = model.predict(input_array_scaled)
 		st.write("**The cell cluster is:**")
+
 		if prediction[0] == 0:
 			st.write("<span class='diagnosis benign'>Benign</span>", unsafe_allow_html=True)
 		else:
@@ -314,12 +319,14 @@ def predictions_tab():
 			st.header("Ask the AI")
 			st.write("Here you can ask the AI a question about the data")
 
+
 def find_exported_files(path):
 	for root, dirs, files in os.walk(path):
 		for file in files:
 			if file.endswith(".png") and file != 'figure2.png' and file != 'bc_awareness.png':
 				return os.path.join(root, file)
 	return None
+
 
 def ask_pandas():
 	llm = OpenAI(api_token='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')
