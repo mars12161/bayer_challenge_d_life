@@ -11,19 +11,7 @@ import pickle
 import streamlit.components.v1 as components
 from streamlit_option_menu import option_menu
 from streamlit_extras.switch_page_button import switch_page
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from sklearn.ensemble import RandomForestClassifier 
-from sklearn.metrics import precision_score, recall_score, f1_score
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from sklearn.linear_model import LogisticRegression
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.svm import SVC
-from sklearn.ensemble import VotingClassifier
-from sklearn.metrics import RocCurveDisplay, auc
-from sklearn.metrics import precision_recall_curve, PrecisionRecallDisplay
-from sklearn import metrics
-from sklearn.metrics import RocCurveDisplay, auc, plot_roc_curve, plot_precision_recall_curve
 from pandasai import PandasAI
 from pandasai.llm.openai import OpenAI
 import openai
@@ -62,14 +50,11 @@ with st.sidebar:
 
 cd_2018 = pd.read_csv('./data/cd_2018.csv') #data needed for map
 df = pd.read_csv('./data/dataset_factorised.csv') #data needed for EDA
-X_scaler = pd.read_csv('./data/X_scaler.csv') #StandardScaler data
-X_train_fr_rfc = pd.read_csv('./data/X_train_rfc_feature_elim.csv') #RFC feature elim.
-X_test_fr_rfc = pd.read_csv('./data/X_test_rfc_feature_elim.csv') #RFC feature elim.
-X_train_lr = pd.read_csv('./data/X_train_lr.csv')
-X_test_lr = pd.read_csv('./data/X_test_lr.csv')
+model = pickle.load(open("./model/lr2.pkl", "rb"))
+scaler = pickle.load(open("./model/trained_scaler.pkl", "rb"))
+X_lr = pd.read_csv('./data/X_lr.csv',index_col= None)
 
 y = df['diagnosis']
-X_train, X_test, y_train, y_test = train_test_split(X_scaler,y, test_size = .20, random_state = 12,  stratify = y)
 Malignant=df[df['diagnosis'] == 0]
 Benign=df[df['diagnosis'] == 1]
 
@@ -198,12 +183,9 @@ def sources_tab():
 		 https://canceratlas.cancer.org/,  \nhttps://ourworldindata.org/cancer  \n")
 
 def predictions_tab():
-	st.subheader('Predictions')
-	X_LR_fe = pd.read_csv('./data/X_LR_feature_reduction.csv')
-
+	st.subheader('Predictions')	
 	def add_info():
 		st.subheader("Cell Nuclei Measurements")
-
 		slider_labels = [
 			("Concavity (mean)", "concavity_mean"),
 			("Concave points (mean)", "concave_points_mean"),
@@ -217,45 +199,13 @@ def predictions_tab():
 			("Concavity (worst)", "concavity_worst"),
 			("Concave points (worst)", "concave_points_worst"),
 			("Symmetry (worst)", "symmetry_worst"),
-#			("Radius (mean)", "radius_mean"),
-#			("Texture (mean)", "texture_mean"),
-#			("Perimeter (mean)", "perimeter_mean"),
-#			("Area (mean)", "area_mean"),
-#			("Smoothness (mean)", "smoothness_mean"),
-#			("Compactness (mean)", "compactness_mean"),
-#			("Concavity (mean)", "concavity_mean"),
-#			("Concave points (mean)", "concave points_mean"),
-#			("Symmetry (mean)", "symmetry_mean"),
-#			("Fractal dimension (mean)", "fractal_dimension_mean"),
-#			("Radius (se)", "radius_se"),
-#			("Texture (se)", "texture_se"),
-#			("Perimeter (se)", "perimeter_se"),
-#			("Area (se)", "area_se"),
-#			("Smoothness (se)", "smoothness_se"),
-#			("Compactness (se)", "compactness_se"),
-#			("Concavity (se)", "concavity_se"),
-#			("Concave points (se)", "concave points_se"),
-#			("Symmetry (se)", "symmetry_se"),
-#			("Fractal dimension (se)", "fractal_dimension_se"),
-#			("Radius (worst)", "radius_worst"),
-#			("Texture (worst)", "texture_worst"),
-#			("Perimeter (worst)", "perimeter_worst"),
-#			("Area (worst)", "area_worst"),
-#			("Smoothness (worst)", "smoothness_worst"),
-#			("Compactness (worst)", "compactness_worst"),
-#			("Concavity (worst)", "concavity_worst"),
-#			("Concave points (worst)", "concave points_worst"),
-#			("Symmetry (worst)", "symmetry_worst"),
-#			("Fractal dimension (worst)", "fractal_dimension_worst"),
 		]
 
 		input_dict = {}
 
 		for label, key in slider_labels:
-#			input_dict[key] = st.slider(label, min_value = float(0), max_value = float(data[key].max()), 
-#				value = float(data[key].mean())
-			input_dict[key] = st.slider(label, min_value = float(0), max_value = float(X_LR_fe[key].max()), 
-				value = float(X_LR_fe[key].mean())
+			input_dict[key] = st.slider(label, min_value = float(0), max_value = float(X_lr[key].max()), 
+				value = float(X_lr[key].mean())
 			)
 		return input_dict
 
@@ -264,9 +214,8 @@ def predictions_tab():
 		scaled_dict = {}
 
 		for key, value in input_dict.items():
-
-			max_val = X_LR_fe[key].max()
-			min_val = X_LR_fe[key].min()
+			max_val = X_lr[key].max()
+			min_val = X_lr[key].min()
 			scaled_value = (value - min_val) / (max_val - min_val)
 			scaled_dict[key] = scaled_value
 		return scaled_dict
@@ -276,12 +225,9 @@ def predictions_tab():
 		input_data = get_scaled_values(input_data)
 
 		categories = ['Radius', 'Texture', 'Perimeter', 'Area', 
-				'Concavity', 'Concave Points',
-				'Symmetry'
+				'Concavity', 'Concave Points', 'Symmetry'
 				]
-
 		fig = go.Figure()
-
 		fig.add_trace(go.Scatterpolar(
 			r=[
 			input_data['concavity_mean'], input_data['concave_points_mean'],0
@@ -315,14 +261,10 @@ def predictions_tab():
 		return fig
 
 	def add_predictions(input_data):
-		model = pickle.load(open("./model/lr2.pkl", "rb"))
-		scaler = StandardScaler()  
 		input_array = np.array(list(input_data.values())).reshape(1, -1)
-		input_array_scaled = scaler.fit_transform(input_array)
+		input_array_scaled = scaler.transform(input_array)
 		prediction = model.predict(input_array_scaled)
-		st.subheader("Cell cluster prediction")
-		st.write("The cell cluster is:")
-
+		st.write("**The cell cluster is:**")
 		if prediction[0] == 0:
 			st.write("<span class='diagnosis benign'>Benign</span>", unsafe_allow_html=True)
 		else:
@@ -352,21 +294,25 @@ def predictions_tab():
 		return(guidelines)
 	with st.container():
 		st.write("Please connect this app to your cytology lab to help diagnose breast cancer form your tissue sample. This app uses a logistic regression machine learning model to predict whether a breast mass is benign or malignant based on the measurements provided from your cytosis lab. You can also update the measurements by hand using the sliders in the sidebar. ")
-
+	st.write("---")
 	col1, col2 = st.columns([1, 3])
 	with col1:
-		input_data = add_info()
+		with st.form("Prediction Form"):
+			input_data = add_info()
+			submitted = st.form_submit_button("Submit")
 	with col2:
-		radar_chart = get_radar_chart(input_data)
-		st.plotly_chart(radar_chart)
-		st.write("---")
-		B , M = add_predictions(input_data)
-		st.write("---")
-		st.header("Ask the AI")
-		st.write("Here you can ask the AI a question about the data")
-		if st.button('Generate guidelines!'):
-			st.write(assistant(B, M))
+		if submitted:
+			st.subheader("Cell cluster prediction")
+			radar_chart = get_radar_chart(input_data)
+			st.plotly_chart(radar_chart)
+			B, M = add_predictions(input_data)
+			st.write("---")
+			if st.button('Generate guidelines!'):
+				st.write(assistant(B, M))
 
+			st.write("---")
+			st.header("Ask the AI")
+			st.write("Here you can ask the AI a question about the data")
 
 def find_exported_files(path):
 	for root, dirs, files in os.walk(path):
@@ -374,7 +320,6 @@ def find_exported_files(path):
 			if file.endswith(".png") and file != 'figure2.png' and file != 'bc_awareness.png':
 				return os.path.join(root, file)
 	return None
-
 
 def ask_pandas():
 	llm = OpenAI(api_token='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')
