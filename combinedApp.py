@@ -80,16 +80,6 @@ def plot_heatmap(confusion):
 	plt.xlabel('Predicted', fontsize=14)
 	plt.ylabel('Actual', fontsize = 14)
 
-def ml_model(model, X_train, y_train, X_test, y_test):
-	model.fit(X_train, y_train)
-	y_train_pred = model.predict(X_train)
-	y_test_pred = model.predict(X_test)
-	results_model_test = pd.DataFrame({
-		'Score': ['accuracy', 'precision', 'recall', 'f1'],
-		'Results': [model.score(X_test, y_test_pred), precision_score(y_test, y_test_pred), recall_score(y_test, y_test_pred), f1_score(y_test, y_test_pred)]})
-	st.subheader("Test Scores")
-	st.write(results_model_test)
-
 def information_tab():
 	st.subheader('Information')
 	st.markdown("An estimated 2.1 million people were diagnosed with breast cancer \
@@ -170,8 +160,7 @@ def machine_learning_tab():
 # link to dashboard here
 	st.subheader("Model Explainer Dashboard Using SHAP")
 	st.markdown("A **hub of interactive dashboards** for analyzing and explaining the predictions.")
-	st.components.v1.iframe("http://172.20.10.3:8050", width=None, height=900, scrolling=True)
-		
+	st.components.v1.iframe("http://127.0.0.1:8050", width=None, height=900, scrolling=True)
 		
 def sources_tab():
 	st.subheader('Dataset')
@@ -320,7 +309,7 @@ def find_exported_files(path):
 def ask_pandas():
 	llm = OpenAI(api_token='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')
 	pandasai = PandasAI(llm, save_charts=True, save_charts_path=export_path, verbose=True)
-	st.subheader("Ask the AI")
+	st.markdown("<h2 style='color: DarkOrchid;'>Ask the AI </h2>", unsafe_allow_html=True)
 	st.write("Here you can ask the AI a question about the data. The AI currently running in the background is OpenAI's GPT.")
 	st.write("Other Large Language Models are available, such as HuggingFace's Falcon.")
 	st.markdown('**Example questions:**')
