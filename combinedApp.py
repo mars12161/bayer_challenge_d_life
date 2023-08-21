@@ -322,7 +322,14 @@ def ask_pandas():
 	llm = OpenAI(api_token='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')
 	pandasai = PandasAI(llm, save_charts=True, save_charts_path=export_path, verbose=True)
 	st.subheader("Ask the AI")
-	st.write("Here you can ask the AI a question about the data.")
+	st.write("Here you can ask the AI a question about the data. The AI currently running in the background is OpenAI's GPT.")
+	st.write("Other Large Language Models are available, such as HuggingFace's Falcon.")
+	st.markdown('**Example questions:**')
+	st.write("- What is the average radius of the cell clusters?")
+	st.write("- What is the standard error of the mean of the cell clusters?")
+	st.write("- Plot the mean radius of the cell clusters by diagnosis.")
+	st.write("- Plot the distribution of the diagnosis in a pie chart.")
+	st.markdown('**Note:** The AI is still learning, so it may not be able to answer all questions correctly.')
 
 	with st.form("Question"):
 		question = st.text_input("Question", value="", type="default")
