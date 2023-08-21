@@ -82,23 +82,28 @@ def plot_heatmap(confusion):
 
 def information_tab():
 	st.subheader('Information')
-	st.markdown("An estimated 2.1 million people were diagnosed with breast cancer \
-		in 2018 worldwide.  It is the second leading cause of death by cancer in females (leading \
-		cause is lung cancer).  \n  \nBreast cancer incidence rates are lowest in less developed regions however their mortality \
-		rates are similar to more developed regions.  This would indicate that it is due to less early \
-		detection.  \n  \nThis project aims to improve the mass screening of populations and \
-		and decreasing medical costs through computer-aided diagnosis.  In addition, early detection has \
-		been correlated with a higher rate of survival.\n")
+	st.markdown("In 2018, an estimated 2.1 million individuals were confronted with \
+		a breast cancer diagnosis across the globe. Regrettably, breast cancer stands as\
+		a formidable contributor to female mortality rates. Particularly in developing nations, \
+		the paucity of healthcare resources often impedes the prompt identification of this \
+		disease.\n\n Though breast cancer incidence rates remain relatively subdued in less developed regions, \
+		their mortality rates mirror those of more developed areas. This disconcerting finding suggests \
+		a distressing probability: a substantial number of cases might be escaping diagnosis entirely. \
+		This supports the urgency for improved detection methods.\n\nThe objective of our initiative \
+		is to enhance the screening of entire populations, thereby mitigating medical expenses, while \
+		leveraging computer-aided diagnosis. Additionally, the correlation between early detection and \
+		increased chances of survival amplifies the significance of this endeavour.")
 	image1 = Image.open('images/figure2.png')
 	st.image(image1)
 	st.write("Source: https://canceratlas.cancer.org")
-	st.subheader('Breast Cancer Deaths in 2018')
-	st.write("Included in the hover data below is the current number of diagnosed cases of breast cancer per 100 people, in both sexes and age-standardized")
+	st.write("---")
+	st.subheader('Breast Cancer Death Rate (per 100,000 Individuals) in 2018')
+	st.write("Included in the hover data below is the rate of diagnosed cases and the rate of breast cancer deaths per 100,000 people, for both sexes and age-standardized.")
 	fig = px.choropleth(cd_2018,
 					 locations = "code", 
-					 color = "deaths", 
+					 color = "death_rate", 
 					 hover_name = "country", 
-					 hover_data = ["diagnosed"],
+					 hover_data = ["diagnosed_rate"],
 					 color_continuous_scale = px.colors.sequential.Sunsetdark)
 	st.plotly_chart(fig)
 	
