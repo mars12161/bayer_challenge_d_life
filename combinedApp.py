@@ -181,16 +181,14 @@ def sources_tab():
 		 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7950292/,\n\
 		 https://canceratlas.cancer.org/,  \nhttps://ourworldindata.org/cancer  \n")
 
-def predictions_tab():
-	st.subheader('Predictions')
-	def add_info():
-		st.markdown("<h3 style='text-align: center; color: orchid;'>Cell Nuclei Measurements </h3>", unsafe_allow_html=True)
-		st.markdown("<font size='2'>You can also update the measurements by hand using the sliders in the sidebar. </font>", unsafe_allow_html=True)
-		slider_labels = [
-			("Concavity (mean)", "concavity_mean"),
-			("Concave points (mean)", "concave_points_mean"),
-			("Radius (se)", "radius_se"),
-			("Perimeter (se)", "perimeter_se"),
+def add_info():
+	st.markdown("<h3 style='text-align: center; color: orchid;'>Cell Nuclei Measurements </h3>", unsafe_allow_html=True)
+	st.markdown("<font size='2'>You can also update the measurements by hand using the sliders in the sidebar. </font>", unsafe_allow_html=True)
+	slider_labels = [
+		("Concavity (mean)", "concavity_mean"),
+		("Concave points (mean)", "concave_points_mean"),
+		("Radius (se)", "radius_se"),
+		("Perimeter (se)", "perimeter_se"),
 			("Area (se)", "area_se"),
 			("Radius (worst)", "radius_worst"),
 			("Texture (worst)", "texture_worst"),
@@ -200,96 +198,96 @@ def predictions_tab():
 			("Concave points (worst)", "concave_points_worst"),
 			("Symmetry (worst)", "symmetry_worst"),
 		]
-		input_dict = {}
+	input_dict = {}
 
-		for label, key in slider_labels:
-			input_dict[key] = st.slider(label, min_value = float(0), max_value = float(X_lr[key].max()), 
-				value = float(X_lr[key].mean())
-			)
-		return input_dict
+	for label, key in slider_labels:
+		input_dict[key] = st.slider(label, min_value = float(0), max_value = float(X_lr[key].max()), 
+			value = float(X_lr[key].mean())
+		)
+	return input_dict
 
-	def get_scaled_values(input_dict):
-		scaled_dict = {}
+def get_scaled_values(input_dict):
+	scaled_dict = {}
 
-		for key, value in input_dict.items():
-			max_val = X_lr[key].max()
-			min_val = X_lr[key].min()
-			scaled_value = (value - min_val) / (max_val - min_val)
-			scaled_dict[key] = scaled_value
-		return scaled_dict
+	for key, value in input_dict.items():
+		max_val = X_lr[key].max()
+		min_val = X_lr[key].min()
+		scaled_value = (value - min_val) / (max_val - min_val)
+		scaled_dict[key] = scaled_value
+	return scaled_dict
 
-	def get_radar_chart(input_data):
-		input_data = get_scaled_values(input_data)
+def get_radar_chart(input_data):
+	input_data = get_scaled_values(input_data)
 
-		categories = ['Radius', 'Texture', 'Perimeter', 'Area', 
-				'Concavity', 'Concave Points', 'Symmetry'
-				]
+	categories = ['Radius', 'Texture', 'Perimeter', 'Area', 
+			'Concavity', 'Concave Points', 'Symmetry'
+			]
 
-		fig = go.Figure()
+	fig = go.Figure()
 
-		fig.add_trace(go.Scatterpolar(
-			r=[
-			input_data['concavity_mean'], input_data['concave_points_mean'],0
-			],
-			theta=categories,
-			fill='toself',
-			name='Mean Value'
-		))
-		fig.add_trace(go.Scatterpolar(
-			r=[
-			input_data['radius_se'], input_data['perimeter_se'], input_data['area_se'], 0
-			],
-			theta=categories,
-			fill='toself',
-			name='Standard Error'
-		))
-		fig.add_trace(go.Scatterpolar(
-			r=[
-			input_data['radius_worst'], input_data['texture_worst'], input_data['perimeter_worst'],
-			input_data['area_worst'], input_data['concavity_worst'], input_data['concave_points_worst'], 
-			input_data['symmetry_worst']
-			],
-			theta=categories,
-			fill='toself',
-			name='Worst Value'
-		))
-		fig.update_layout(
-			polar = dict(radialaxis = dict(visible = True,range = [0, 1])),
-			showlegend = True
-			)
-		return fig
+	fig.add_trace(go.Scatterpolar(
+		r=[
+		0,0,0,0,input_data['concavity_mean'], input_data['concave_points_mean'],0
+		],
+		theta=categories,
+		fill='toself',
+		name='Mean Value'
+	))
+	fig.add_trace(go.Scatterpolar(
+		r=[
+		input_data['radius_se'],0, input_data['perimeter_se'], input_data['area_se'], 0,0
+		],
+		theta=categories,
+		fill='toself',
+		name='Standard Error'
+	))
+	fig.add_trace(go.Scatterpolar(
+		r=[
+		input_data['radius_worst'], input_data['texture_worst'], input_data['perimeter_worst'],
+		input_data['area_worst'], input_data['concavity_worst'], input_data['concave_points_worst'], 
+		input_data['symmetry_worst']
+		],
+		theta=categories,
+		fill='toself',
+		name='Worst Value'
+	))
+	fig.update_layout(
+		polar = dict(radialaxis = dict(visible = True,range = [0, 1])),
+		showlegend = True
+		)
+	return fig
 
-	def add_predictions(input_data): 
-		input_array = np.array(list(input_data.values())).reshape(1, -1)
-		input_array_scaled = scaler.transform(input_array)
-		prediction = model.predict(input_array_scaled)
-		st.subheader("**The cell cluster is:**")
-		if prediction[0] == 0:
-			st.write("<span class='diagnosis benign'>:blue[**Benign**]</span>", unsafe_allow_html=True)
-		else:
-			st.write("<span class='diagnosis malignant'>:blue[**Malignant**]</span>", unsafe_allow_html=True)
-		st.write("Probability of being benign: ",model.predict_proba(input_array_scaled)[0][0])
-		st.write("Probability of being malignant: ", model.predict_proba(input_array_scaled)[0][1])
-		return (model.predict_proba(input_array_scaled)[0][0], model.predict_proba(input_array_scaled)[0][1])
+def add_predictions(input_data): 
+	input_array = np.array(list(input_data.values())).reshape(1, -1)
+	input_array_scaled = scaler.transform(input_array)
+	prediction = model.predict(input_array_scaled)
+	st.subheader("**The cell cluster is:**")
+	if prediction[0] == 0:
+		st.write("<span class='diagnosis benign'>:blue[**Benign**]</span>", unsafe_allow_html=True)
+	else:
+		st.write("<span class='diagnosis malignant'>:blue[**Malignant**]</span>", unsafe_allow_html=True)
+	st.write(f"Probability of being benign: {model.predict_proba(input_array_scaled)[0][0]: .3f}")
+	st.write(f"Probability of being malignant: {model.predict_proba(input_array_scaled)[0][1]: .3f}")
+	return (model.predict_proba(input_array_scaled)[0][0], model.predict_proba(input_array_scaled)[0][1])
 
-	def assistant(B, M):
-		openai.api_key = "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"
-		prompt = (
-			"I build an app with Wisconsin breast cancer diagnosis and used machine learning to give you these results, "
-			"now I want you to be in the role of assistant within that app and generate general guidelines "
-			"on what should he/she do when I give you the percentage now generate guidelines for these predictions "
-			"as you are talking to the patient:\n"
-			f"Prediction Results:\nMalignant Probability: {M}\nBenign Probability: {B}"
-			)
-		response = openai.Completion.create(
-			model="text-davinci-003",
-			prompt=prompt,
-			temperature=0.6,
-			max_tokens = 400
-			)
-		guidelines = response.choices[0].text.strip()
-		return(guidelines)
-	
+def assistant(B, M):
+	openai.api_key = "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"
+	prompt = (
+		"I build an app with Wisconsin breast cancer diagnosis and used machine learning to give you these results, "
+		"now act as the role of assistant within that app and generate general guidelines and tell them what should they do act as you are talking to the patients directly"
+		f"Prediction Results:\nMalignant Probability: {M}\nBenign Probability: {B}"
+		)
+	response = openai.Completion.create(
+		model="text-davinci-003",
+		prompt=prompt,
+		temperature=0.6,
+		max_tokens = 400
+		)
+	guidelines = response.choices[0].text.strip()
+	return(guidelines)
+
+def predictions_tab():
+	st.subheader('Predictions')
 	with st.container():
 		st.write("Please connect this app to your cytology lab to help diagnose breast cancer form your tissue sample. This app uses a logistic regression machine learning model to predict whether a breast mass is benign or malignant based on the measurements provided from your cytosis lab. ")
 		st.text("")
@@ -306,8 +304,9 @@ def predictions_tab():
 			radar_chart = get_radar_chart(input_data)
 			st.plotly_chart(radar_chart)
 			B, M = add_predictions(input_data)
-			if st.button('Generate guidelines!'):
-				st.write(assistant(B, M))
+			st.write("---")
+			# if st.button('Receive tips from AI!'):
+			st.write(assistant(B, M))
 
 			st.write("---")
 
