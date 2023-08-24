@@ -14,6 +14,11 @@ from streamlit_extras.switch_page_button import switch_page
 from pandasai import PandasAI
 from pandasai.llm.openai import OpenAI
 import openai
+from dotenv.main import load_dotenv
+
+load_dotenv()
+
+api_key = os.getenv("API_TOKEN") 
 
 export_path = os.path.join(os.getcwd(), 'exports')
 
@@ -159,9 +164,6 @@ def exploratory_analysis_tab():
 def machine_learning_tab():
 	st.subheader('Machine Learning')
 	st.write("All machine learning models were trained using an 80/20 split on stratified data that was standardised using StandardScaler.")
-	st.subheader('ROC and AUC for All Models')
-	image_all_ROC = Image.open('./images/All_Models_ROC.png')
-	st.image(image_all_ROC)
 # link to dashboard here
 	st.subheader("Model Explainer Dashboard Using SHAP")
 	st.markdown("A **hub of interactive dashboards** for analyzing and explaining the predictions.")
@@ -265,7 +267,7 @@ def add_predictions(input_data):
 	return (model.predict_proba(input_array_scaled)[0][0], model.predict_proba(input_array_scaled)[0][1])
 
 def assistant(B, M):
-	openai.api_key = "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"
+	openai.api_key = api_key
 	prompt = (
 		"I build an app with Wisconsin breast cancer diagnosis and used machine learning to give you these results, "
 		"now act as the role of assistant within that app and generate general guidelines and tell them what should they do act as you are talking to the patients directly"
@@ -312,7 +314,7 @@ def find_exported_files(path):
 	return None
 
 def ask_pandas():
-	llm = OpenAI(api_token='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')
+	llm = OpenAI(api_key)
 	pandasai = PandasAI(llm, save_charts=True, save_charts_path=export_path, verbose=True)
 	st.markdown("<h2 style='color: DarkOrchid;'>Ask the AI </h2>", unsafe_allow_html=True)
 	st.write("Here you can ask the AI a question about the data. The AI currently running in the background is OpenAI's GPT.")
