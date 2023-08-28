@@ -11,12 +11,12 @@ import pickle
 import streamlit.components.v1 as components
 from streamlit_option_menu import option_menu
 from streamlit_extras.switch_page_button import switch_page
-from pandasai import PandasAI
-from pandasai.llm.openai import OpenAI
-import openai
-from dotenv.main import load_dotenv
+# from pandasai import PandasAI
+# from pandasai.llm.openai import OpenAI
+# import openai
+#from dotenv.main import load_dotenv
 
-load_dotenv()
+#load_dotenv()
 
 api_key = os.getenv("API_TOKEN") 
 
@@ -167,7 +167,7 @@ def machine_learning_tab():
 # link to dashboard here
 	st.subheader("Model Explainer Dashboard Using SHAP")
 	st.markdown("A **hub of interactive dashboards** for analyzing and explaining the predictions.")
-	st.components.v1.iframe("http://127.0.0.1:8050", width=None, height=900, scrolling=True)
+	st.components.v1.iframe("https://final-2znz-main-afectjcvzq-wm.a.run.app/", width=1300, height=700, scrolling=True)
 		
 def sources_tab():
 	st.subheader('Dataset')
