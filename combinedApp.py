@@ -11,12 +11,12 @@ import pickle
 import streamlit.components.v1 as components
 from streamlit_option_menu import option_menu
 from streamlit_extras.switch_page_button import switch_page
-# from pandasai import PandasAI
-# from pandasai.llm.openai import OpenAI
-# import openai
-#from dotenv.main import load_dotenv
+from pandasai import PandasAI
+from pandasai.llm.openai import OpenAI
+import openai
+from dotenv.main import load_dotenv
 
-#load_dotenv()
+load_dotenv()
 
 api_key = os.getenv("API_TOKEN") 
 
